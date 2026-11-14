@@ -54,6 +54,12 @@ app = FastAPI(
 STATIC_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
+
+@app.get("/health")
+@app.get("/healthz")
+def health_check():
+    return {"status": "ok"}
+
 app.include_router(sqli.router)
 app.include_router(xss.router)
 app.include_router(idor.router)
