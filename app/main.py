@@ -60,6 +60,21 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 def health_check():
     return {"status": "ok"}
 
+
+@app.get("/v1/models")
+def v1_models():
+    return {
+        "object": "list",
+        "data": [
+            {
+                "id": "cyberlab-agent",
+                "object": "model",
+                "created": 1700000000,
+                "owned_by": "cyberlab",
+            }
+        ],
+    }
+
 app.include_router(sqli.router)
 app.include_router(xss.router)
 app.include_router(idor.router)
@@ -170,6 +185,11 @@ def dashboard_view(
             "active_tab": "dashboard",
         },
     )
+
+
+@app.get("/submit-flag")
+def submit_flag_get():
+    return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
 
 
 @app.post("/submit-flag")

@@ -2,7 +2,7 @@ import re
 import sqlite3
 from pathlib import Path
 from fastapi import APIRouter, Request, Form
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from app.database import get_db
@@ -225,6 +225,11 @@ def check_user_endpoint(username: str = ""):
     except sqlite3.OperationalError as e:
         conn.close()
         return JSONResponse(status_code=400, content={"error": str(e), "query": query})
+
+
+@router.get("/login")
+def sqli_login_get():
+    return RedirectResponse(url="/labs/sqli#auth-bypass", status_code=303)
 
 
 @router.post("/login", response_class=HTMLResponse)
