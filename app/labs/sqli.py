@@ -1,14 +1,17 @@
+import re
 import sqlite3
+from pathlib import Path
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
-from pathlib import Path
 
 from app.database import get_db
 
 router = APIRouter(prefix="/labs/sqli", tags=["SQL Injection"])
 TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+
+NESTED_SQL_FLAG = "FLAG{nested_keyword_filter_bypass_3310}"
 
 AUTH_BYPASS_VULN_CODE = """@router.post("/login")
 def login(username: str = Form(...), password: str = Form(...)):
@@ -71,9 +74,32 @@ def check_user_exists(username: str = ""):
     return {"exists": bool(user)}
 """
 
+NESTED_SQL_VULN_CODE = """@router.get("/nested-search")
+def search_filtered(q: str = ""):
+    for kw in ["SELECT", "UNION", "WHERE", "AND", "OR"]:
+        q = re.sub(kw, "", q, flags=re.IGNORECASE)
+    query = f"SELECT id, name, price FROM products WHERE name LIKE '%{q}%'"
+    cursor.execute(query)
+    return cursor.fetchall()
+"""
+
+NESTED_SQL_FIX_CODE = """@router.get("/nested-search")
+def search_filtered(q: str = ""):
+    query = "SELECT id, name, price FROM products WHERE name LIKE ?"
+    cursor.execute(query, (f"%{q}%",))
+    return cursor.fetchall()
+"""
+
+
+def strip_sql_keywords_once(val: str) -> str:
+    keywords = ["SELECT", "UNION", "WHERE", "AND", "OR"]
+    for kw in keywords:
+        val = re.sub(kw, "", val, flags=re.IGNORECASE)
+    return val
+
 
 @router.get("", response_class=HTMLResponse)
-def sqli_lab_view(request: Request, q: str = "", blind_user: str = ""):
+def sqli_lab_view(request: Request, q: str = "", blind_user: str = "", nested_q: str = ""):
     search_results = []
     search_error = None
     executed_search_query = None
@@ -111,6 +137,28 @@ def sqli_lab_view(request: Request, q: str = "", blind_user: str = ""):
         finally:
             conn.close()
 
+    nested_results = []
+    nested_error = None
+    executed_nested_query = None
+    stripped_q = None
+    nested_flag = None
+
+    if nested_q != "":
+        conn = get_db()
+        cursor = conn.cursor()
+        stripped_q = strip_sql_keywords_once(nested_q)
+        executed_nested_query = f"SELECT id, name, category, price, description FROM products WHERE name LIKE '%{stripped_q}%'"
+        try:
+            cursor.execute(executed_nested_query)
+            rows = cursor.fetchall()
+            nested_results = [dict(row) for row in rows]
+            if "union" in stripped_q.lower() and "select" in stripped_q.lower():
+                nested_flag = NESTED_SQL_FLAG
+        except sqlite3.OperationalError as e:
+            nested_error = str(e)
+        finally:
+            conn.close()
+
     return templates.TemplateResponse(
         request=request,
         name="sqli.html",
@@ -123,15 +171,45 @@ def sqli_lab_view(request: Request, q: str = "", blind_user: str = ""):
             "blind_result": blind_result,
             "blind_error": blind_error,
             "executed_blind_query": executed_blind_query,
+            "nested_q": nested_q,
+            "stripped_q": stripped_q,
+            "nested_results": nested_results,
+            "nested_error": nested_error,
+            "executed_nested_query": executed_nested_query,
+            "nested_flag": nested_flag,
             "auth_code_snippet": AUTH_BYPASS_VULN_CODE,
             "auth_fix_code": AUTH_FIX_CODE,
             "union_code_snippet": UNION_VULN_CODE,
             "union_fix_code": UNION_FIX_CODE,
             "blind_code_snippet": BLIND_VULN_CODE,
             "blind_fix_code": BLIND_FIX_CODE,
+            "nested_sql_code_snippet": NESTED_SQL_VULN_CODE,
+            "nested_sql_fix_code": NESTED_SQL_FIX_CODE,
             "active_tab": "sqli",
         },
     )
+
+
+@router.get("/nested-search", response_class=JSONResponse)
+def nested_search_endpoint(q: str = ""):
+    conn = get_db()
+    cursor = conn.cursor()
+    stripped_q = strip_sql_keywords_once(q)
+    executed_nested_query = f"SELECT id, name, category, price, description FROM products WHERE name LIKE '%{stripped_q}%'"
+    try:
+        cursor.execute(executed_nested_query)
+        rows = [dict(r) for r in cursor.fetchall()]
+        conn.close()
+        flag = NESTED_SQL_FLAG if ("union" in stripped_q.lower() and "select" in stripped_q.lower()) else None
+        return {
+            "query_original": q,
+            "query_stripped": stripped_q,
+            "results": rows,
+            "flag": flag,
+        }
+    except sqlite3.OperationalError as e:
+        conn.close()
+        return JSONResponse(status_code=400, content={"error": str(e), "executed_query": executed_nested_query})
 
 
 @router.get("/check-user", response_class=JSONResponse)
@@ -206,6 +284,8 @@ def sqli_login(
             "union_fix_code": UNION_FIX_CODE,
             "blind_code_snippet": BLIND_VULN_CODE,
             "blind_fix_code": BLIND_FIX_CODE,
+            "nested_sql_code_snippet": NESTED_SQL_VULN_CODE,
+            "nested_sql_fix_code": NESTED_SQL_FIX_CODE,
             "username_val": username,
             "active_tab": "sqli",
         },

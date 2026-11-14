@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, Request, Form, status
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -30,6 +30,7 @@ from app.labs import (
     crypto_lab,
     api_lab,
     dom_lab,
+    recon,
 )
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -73,6 +74,37 @@ app.include_router(headers_lab.router)
 app.include_router(crypto_lab.router)
 app.include_router(api_lab.router)
 app.include_router(dom_lab.router)
+app.include_router(recon.router)
+
+
+@app.get("/robots.txt", response_class=PlainTextResponse)
+def robots_txt():
+    return (
+        "User-agent: *\n"
+        "Disallow: /admin\n"
+        "Disallow: /restricted-archive/\n"
+        "Disallow: /labs/recon?view=secret-archive\n"
+        "Disallow: /internal-metrics/\n"
+    )
+
+
+@app.get("/.well-known/security.txt", response_class=PlainTextResponse)
+def security_txt():
+    return (
+        "Contact: security-audit@cyber.lab\n"
+        "Expires: 2027-12-31T23:59:59.000Z\n"
+        "Encryption: https://cyber.lab/pgp-key.txt\n"
+        "Disclose-Path: /labs/recon?view=secret-archive\n"
+    )
+
+
+@app.get("/restricted-archive/", response_class=PlainTextResponse)
+@app.get("/restricted-archive", response_class=PlainTextResponse)
+def restricted_archive_view():
+    return (
+        "CONFIDENTIAL INTERNAL ARCHIVE REPOSITORY\n"
+        "FLAG{recon_hidden_robots_path_disclosure_1982}\n"
+    )
 
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 

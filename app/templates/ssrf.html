@@ -9,7 +9,7 @@
         <div>
             <div class="flex items-center space-x-2">
                 <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">Module: SSRF</span>
-                <span class="text-[11px] px-2 py-0.5 rounded-md bg-white text-black font-bold font-mono">1 Exercise</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-white text-black font-bold font-mono">2 Exercises</span>
             </div>
             <h1 class="text-xl font-bold text-white mt-1">Server-Side Request Forgery (SSRF)</h1>
             <p class="text-xs text-zinc-400 mt-1 font-mono">
@@ -17,7 +17,7 @@
             </p>
         </div>
         <div class="flex items-center space-x-2 font-mono text-xs">
-            <span class="px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">Internal Pivoting</span>
+            <span class="px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">Internal Pivoting & Metadata</span>
         </div>
     </div>
 
@@ -59,7 +59,7 @@
                 </span>
                 {% endif %}
             </div>
-            <div class="p-4 min-h-[160px] font-mono text-xs text-zinc-200 leading-relaxed overflow-x-auto select-all">
+            <div class="p-4 min-h-[140px] font-mono text-xs text-zinc-200 leading-relaxed overflow-x-auto select-all">
                 {% if preview_error %}
                 <div class="text-zinc-400">
                     [!] Request Exception: {{ preview_error }}
@@ -89,8 +89,8 @@
             </div>
 
             <div id="ssrf-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
-                <p>• In containerized or microservice environments, applications communicate over private internal network segments using service names.</p>
-                <p>• Evaluate infrastructure configuration definitions for internally registered hostnames and listening service ports.</p>
+                <p>&bull; In containerized or microservice environments, applications communicate over private internal network segments using service names.</p>
+                <p>&bull; Evaluate infrastructure configuration definitions for internally registered hostnames and listening service ports.</p>
             </div>
 
             <div id="ssrf-vuln" class="hidden">
@@ -99,6 +99,88 @@
 
             <div id="ssrf-fix" class="hidden">
                 <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ ssrf_fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div id="metadata-pivot" class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 02</span>
+                <h2 class="text-base font-bold text-white">Cloud Metadata Service Exfiltration</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-white text-black font-bold">Hard</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            Cloud infrastructure provides instance metadata through non-routable link-local IP addresses (169.254.169.254). Investigate how an unvalidated egress request allows attackers to traverse metadata directories and extract temporary IAM instance role credentials.
+        </p>
+
+        <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 space-y-4">
+            <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider">Metadata Endpoint Inspector</h3>
+            <form action="/labs/ssrf/check-metadata" method="POST" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-mono text-zinc-400 mb-1">Metadata Destination URL</label>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" name="meta_url" value="{{ meta_submitted_url }}" placeholder="http://169.254.169.254/latest/meta-data/" required
+                            class="flex-grow px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+                        <button type="submit" class="px-5 py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                            Query Metadata
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="rounded-md border border-zinc-800 overflow-hidden bg-black shadow-sm">
+            <div class="px-4 py-2 bg-[#0c0c0e] border-b border-zinc-800 flex items-center justify-between font-mono text-xs">
+                <span class="text-zinc-400">Metadata Stream:</span>
+                {% if meta_status %}
+                <span class="px-2 py-0.5 rounded-md bg-zinc-800 text-white font-bold border border-zinc-700 text-[10px]">
+                    Status: {{ meta_status }}
+                </span>
+                {% endif %}
+            </div>
+            <div class="p-4 min-h-[140px] font-mono text-xs text-zinc-200 leading-relaxed overflow-x-auto select-all">
+                {% if meta_error %}
+                <div class="text-zinc-400">
+                    [!] Metadata Query Exception: {{ meta_error }}
+                </div>
+                {% elif meta_body is not none %}
+                    <pre class="whitespace-pre-wrap">{{ meta_body }}</pre>
+                {% else %}
+                    <span class="text-zinc-600 italic">No metadata query initiated. Enter a link-local address above.</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'meta-hint', 'meta-vuln', 'meta-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'meta-vuln', 'meta-hint', 'meta-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'meta-fix', 'meta-hint', 'meta-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="meta-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>&bull; Cloud instances expose configuration APIs on the link-local IPv4 range (169.254.169.254).</p>
+                <p>&bull; Discover IAM role directories under the standard metadata path: /latest/meta-data/iam/security-credentials/</p>
+            </div>
+
+            <div id="meta-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ ssrf_meta_vuln_code }}</code></pre>
+            </div>
+
+            <div id="meta-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ ssrf_meta_fix_code }}</code></pre>
             </div>
         </div>
     </div>

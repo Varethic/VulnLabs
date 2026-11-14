@@ -4,7 +4,7 @@ A modular, intentionally vulnerable web security training laboratory designed ex
 
 > [!IMPORTANT]
 > **STRICTLY FOR EDUCATIONAL STUDY PURPOSES ONLY.**
-> This software is intended solely for academic learning, vulnerability research, and defense mechanisms study. It contains intentionally flawed logic (SQLi, XSS, IDOR, CMDi, LFI, JWT, SSRF, SSTI, Race Conditions, XXE, Insecure Deserialization, Mass Assignment, CSRF, Open Redirect, CORS, Unrestricted Upload, Header Spoofing, Weak PRNG, API BOLA, DOM XSS) to demonstrate security impact and remediation patterns. Do not deploy to public untrusted networks or production environments.
+> This software is intended solely for academic learning, vulnerability research, and defense mechanisms study. It contains intentionally flawed logic (SQLi, XSS, IDOR, CMDi, LFI, JWT, SSRF, SSTI, Race Conditions, XXE, Insecure Deserialization, Mass Assignment, CSRF, Open Redirect, CORS, Unrestricted Upload, Header Spoofing, Weak PRNG, API BOLA, DOM XSS, Reconnaissance) to demonstrate security impact and remediation patterns. Do not deploy to public untrusted networks or production environments.
 
 ---
 
@@ -17,24 +17,24 @@ A modular, intentionally vulnerable web security training laboratory designed ex
 ├── requirements.txt                # FastAPI, Uvicorn, Jinja2, PyJWT, HTTPX, Playwright
 ├── flag.txt                        # Root filesystem flags (CMDi & LFI)
 ├── labs.db                         # SQLite database (auto-seeded on startup)
-├── test_lab.py                     # Automated 24-challenge verification test suite
+├── test_lab.py                     # Automated 28-challenge verification test suite
 ├── internal_admin/                 # Isolated internal microservice (SSRF pivot target)
 │   ├── Dockerfile
 │   └── main.py                     # Listens on port 9000, returns internal secret flag
 └── app/
     ├── __init__.py
-    ├── main.py                     # App entry point, dashboard, flag submission engine
+    ├── main.py                     # App entry point, dashboard, flag submission engine, robots.txt
     ├── database.py                 # SQLite initialization, wallet schema & environment reset
     ├── flags.py                    # Central CTF challenge metadata & flag registry
     ├── docs/                       # Target documents for LFI exploration
-    ├── labs/                       # 20 Modular vulnerability routers
-    │   ├── sqli.py                 # Auth bypass, UNION exfiltration & Blind boolean inference
+    ├── labs/                       # 21 Modular vulnerability routers
+    │   ├── sqli.py                 # Auth bypass, UNION exfiltration, Blind & Nested keyword bypass
     │   ├── xss.py                  # Reflected XSS, Stored Guestbook & Playwright Admin Bot
     │   ├── idor.py                 # Broken Object Level Authorization (Invoices)
     │   ├── cmdi.py                 # Network diagnostic OS command injection
-    │   ├── lfi.py                  # Directory traversal & file inclusion
+    │   ├── lfi.py                  # Directory traversal & nested non-recursive strip bypass
     │   ├── jwt_lab.py              # JWT signature bypass & 'none' algorithm
-    │   ├── ssrf.py                 # URL preview checker & internal pivoting
+    │   ├── ssrf.py                 # Internal microservice pivot & cloud metadata exfiltration
     │   ├── ssti.py                 # Jinja2 template injection & Python RCE
     │   ├── race.py                 # Concurrency TOCTOU coupon redemption glitch
     │   ├── xxe.py                  # XML External Entity injection
@@ -47,20 +47,21 @@ A modular, intentionally vulnerable web security training laboratory designed ex
     │   ├── headers_lab.py          # Reverse proxy header spoofing & IP bypass
     │   ├── crypto_lab.py           # Weak time-seeded PRNG token prediction
     │   ├── api_lab.py              # API property exposure & BOLA
-    │   └── dom_lab.py              # DOM-based XSS execution sinks
+    │   ├── dom_lab.py              # DOM-based XSS execution sinks
+    │   └── recon.py                # Crawler enumeration & concealed archive discovery
     ├── static/
     │   ├── css/style.css           # Minimalist Monochrome theme (IBM Plex Mono)
     │   └── js/lab.js               # 3-tab switcher (Hint / Vulnerable Source / How to Fix)
     └── templates/                  # Dark-mode educational web interface (rounded-md)
         ├── base.html               # Shared layout, navbar, live flag submit modal
         ├── index.html              # Central dashboard & curriculum tracker
-        ├── sqli.html               # SQLi workspace (Auth, UNION, Blind)
+        ├── sqli.html               # SQLi workspace (Auth, UNION, Blind, Nested Filter)
         ├── xss.html                # XSS workspace with Playwright Bot trigger
         ├── idor.html               # IDOR workspace with 3-tab secure code comparison
         ├── cmdi.html               # CMDi terminal with 3-tab secure code comparison
-        ├── lfi.html                # LFI reader with 3-tab secure code comparison
+        ├── lfi.html                # LFI reader & nested traversal bypass
         ├── jwt.html                # JWT attack workbench
-        ├── ssrf.html               # SSRF preview workbench & pivot target
+        ├── ssrf.html               # SSRF workbench (Internal Pivot & Cloud Metadata)
         ├── ssti.html               # SSTI custom badge generator
         ├── race.html               # Race condition wallet balance & exploit helper
         ├── xxe.html                # XXE order parser workbench
@@ -73,7 +74,8 @@ A modular, intentionally vulnerable web security training laboratory designed ex
         ├── headers.html            # Upstream proxy header evaluator
         ├── crypto.html             # Weak PRNG token prediction workbench
         ├── api.html                # REST API property exposure viewer
-        └── dom.html                # DOM XSS client execution sink
+        ├── dom.html                # DOM XSS client execution sink
+        └── recon.html              # Asset discovery & robots exclusion probe
 ```
 
 ---
@@ -116,28 +118,31 @@ A modular, intentionally vulnerable web security training laboratory designed ex
 
 ### Option 3: Automated Verification Suite
 
-Run automated checks across all 24 vulnerability paths and flag verification:
+Run automated checks across all 28 vulnerability paths and flag verification:
 ```bash
 python test_lab.py
 ```
 
 ---
 
-## 🎯 Challenge Matrix & Flag Registry (24 Exercises)
+## 🎯 Challenge Matrix & Flag Registry (28 Exercises)
 
 | ID | Category | Title | Difficulty | Target Route | Flag |
 |---|---|---|---|---|---|
 | `sqli-auth` | SQLi | Login Bypass | Introductory | `POST /labs/sqli/login` | `FLAG{sqli_auth_bypass_login_pwned_8192}` |
 | `sqli-union` | SQLi | UNION Exfiltration | Intermediate | `GET /labs/sqli?q=` | `FLAG{sqli_union_db_extraction_7719}` |
 | `sqli-blind` | SQLi | Boolean Blind Inference | Advanced | `GET /labs/sqli#blind-check` | `FLAG{blind_sqli_boolean_extraction_9102}` |
+| `sqli-nested` | SQLi | Nested Keyword Filter Bypass | Advanced | `GET /labs/sqli#nested-filter` | `FLAG{nested_keyword_filter_bypass_3310}` |
 | `xss-reflected` | XSS | Reflected Injection | Introductory | `GET /labs/xss?q=` | `FLAG{r3fl3ct3d_xss_c00k13_st0l3n_4421}` |
 | `xss-stored` | XSS | Stored Guestbook | Intermediate | `POST /labs/xss/guestbook` | `FLAG{st0r3d_xss_p3rs1st3nt_p4yl04d_5532}` |
 | `xss-bot` | XSS | Playwright Admin Bot | Advanced | `POST /labs/xss/report` | `FLAG{xss_stole_admin_cookie}` |
 | `idor` | Access Control | Invoice Enumeration | Introductory | `GET /labs/idor?receipt_id=` | `FLAG{1d0r_privilege_escalation_view_secret_3301}` |
 | `cmdi` | OS Execution | Diagnostic Ping | Advanced | `POST /labs/cmdi/ping` | `FLAG{c0mm4nd_1nj3ct10n_r00t_sh3ll_9824}` |
 | `lfi` | Path Traversal | Arbitrary File Reader | Intermediate | `GET /labs/lfi?file=` | `FLAG{p4th_tr4v3rs4l_lfi_r34d_syst3m_f1l3s_1048}` |
+| `lfi-nested` | Path Traversal | Nested Non-Recursive Strip Bypass | Advanced | `GET /labs/lfi#nested-traversal` | `FLAG{nested_traversal_non_recursive_bypass_5591}` |
 | `jwt` | Authentication | Signature Verification Bypass | Intermediate | `POST /labs/jwt/admin-vault` | `FLAG{jwt_broken_verification_admin_3389}` |
 | `ssrf` | SSRF | Internal Network Pivoting | Advanced | `POST /labs/ssrf/check-url` | `FLAG{ssrf_internal_pivot_pwned_9941}` |
+| `ssrf-metadata` | SSRF | Cloud Metadata Exfiltration | Advanced | `POST /labs/ssrf/check-metadata` | `FLAG{ssrf_cloud_metadata_credential_leak_6631}` |
 | `ssti` | SSTI | Jinja2 Template Injection RCE | Advanced | `POST /labs/ssti/render` | `FLAG{ssti_jinja2_template_rce_8812}` |
 | `race` | Concurrency | TOCTOU Coupon Redemption | Advanced | `POST /labs/race/redeem` | `FLAG{race_condition_toctou_balance_glitch_4011}` |
 | `xxe` | XML Injection | XML External Entity Injection | Advanced | `POST /labs/xxe/parse` | `FLAG{xxe_external_entity_disclosure_7261}` |
@@ -151,3 +156,4 @@ python test_lab.py
 | `crypto-weak` | Cryptography | Predictable Token Generation | Intermediate | `POST /labs/crypto/verify-token` | `FLAG{weak_prng_predictable_token_7734}` |
 | `bola-api` | API Security | Property-Level Exposure | Introductory | `GET /labs/api-security/api/v1/users/` | `FLAG{bola_api_sensitive_field_exposure_5519}` |
 | `dom-xss` | Client-Side Injection | Client Execution Sink | Intermediate | `GET /labs/dom-xss?nickname=` | `FLAG{dom_xss_execution_sink_untrusted_source_9918}` |
+| `recon-hidden` | Information Disclosure | Crawler Governance & Robots Disclosure | Introductory | `GET /labs/recon` | `FLAG{recon_hidden_robots_path_disclosure_1982}` |

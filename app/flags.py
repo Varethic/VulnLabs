@@ -26,6 +26,15 @@ CHALLENGES = {
         "flag": "FLAG{blind_sqli_boolean_extraction_9102}",
         "route": "/labs/sqli#blind-check",
     },
+    "sqli-nested": {
+        "id": "sqli-nested",
+        "title": "SQLi: Nested Keyword Sanitization Bypass",
+        "category": "SQL Injection",
+        "difficulty": "Hard",
+        "description": "Bypass single-pass keyword stripping filters using nested token interleaving.",
+        "flag": "FLAG{nested_keyword_filter_bypass_3310}",
+        "route": "/labs/sqli#nested-filter",
+    },
     "xss-reflected": {
         "id": "xss-reflected",
         "title": "XSS: Reflected",
@@ -80,6 +89,15 @@ CHALLENGES = {
         "flag": "FLAG{p4th_tr4v3rs4l_lfi_r34d_syst3m_f1l3s_1048}",
         "route": "/labs/lfi",
     },
+    "lfi-nested": {
+        "id": "lfi-nested",
+        "title": "Path Traversal: Nested Non-Recursive Strip",
+        "category": "File Inclusion",
+        "difficulty": "Hard",
+        "description": "Bypass non-recursive path sequence sanitization using nested traversal segments.",
+        "flag": "FLAG{nested_traversal_non_recursive_bypass_5591}",
+        "route": "/labs/lfi#nested-traversal",
+    },
     "jwt": {
         "id": "jwt",
         "title": "JWT: Signature Bypass",
@@ -97,6 +115,15 @@ CHALLENGES = {
         "description": "Abuse server-side request functionality to scan and access isolated internal network services.",
         "flag": "FLAG{ssrf_internal_pivot_pwned_9941}",
         "route": "/labs/ssrf",
+    },
+    "ssrf-metadata": {
+        "id": "ssrf-metadata",
+        "title": "SSRF: Cloud Metadata Exfiltration",
+        "category": "Server-Side Request Forgery",
+        "difficulty": "Hard",
+        "description": "Pivot requests to internal metadata service addresses to capture instance IAM credentials.",
+        "flag": "FLAG{ssrf_cloud_metadata_credential_leak_6631}",
+        "route": "/labs/ssrf#metadata-pivot",
     },
     "ssti": {
         "id": "ssti",
@@ -214,6 +241,15 @@ CHALLENGES = {
         "description": "Analyze client-side scripts reading unsanitized location sources into dangerous DOM execution sinks.",
         "flag": "FLAG{dom_xss_execution_sink_untrusted_source_9918}",
         "route": "/labs/dom-xss",
+    },
+    "recon-hidden": {
+        "id": "recon-hidden",
+        "title": "Reconnaissance: Hidden Assets & Robots Disclosure",
+        "category": "Information Disclosure",
+        "difficulty": "Easy",
+        "description": "Enumerate web crawler governance policies and discover concealed internal administrative archives.",
+        "flag": "FLAG{recon_hidden_robots_path_disclosure_1982}",
+        "route": "/labs/recon",
     },
 }
 

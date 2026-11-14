@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Reconnaissance Lab | Web Security Laboratory{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">Module: Reconnaissance</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-white text-black font-bold font-mono">1 Exercise</span>
+            </div>
+            <h1 class="text-xl font-bold text-white mt-1">Reconnaissance & Asset Discovery</h1>
+            <p class="text-xs text-zinc-400 mt-1 font-mono">
+                Analyze information disclosure vectors where public crawler policies and policy files inadvertently leak confidential administrative paths.
+            </p>
+        </div>
+        <div class="flex items-center space-x-2 font-mono text-xs">
+            <span class="px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">Information Disclosure</span>
+        </div>
+    </div>
+
+    <div class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 01</span>
+                <h2 class="text-base font-bold text-white">Crawler Governance Enumeration</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-white text-black font-bold">Fundamental</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            Web servers frequently publish indexing policy files such as robots.txt or security.txt. Improperly constructed exclusion rules can inadvertently index concealed administrative interfaces, development staging folders, or archive repositories to unauthorized analysts.
+        </p>
+
+        <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 space-y-4">
+            <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider">Asset Route Probe Utility</h3>
+            <form action="/labs/recon/probe" method="POST" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-mono text-zinc-400 mb-1">Target Path / Resource Identifier</label>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" name="path" value="{{ probed_path }}" placeholder="/robots.txt" required
+                            class="flex-grow px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+                        <button type="submit" class="px-5 py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                            Probe Route
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        {% if discovered_archive or flag_content %}
+        <div class="p-4 bg-zinc-900 border border-zinc-600 rounded-md text-xs font-mono text-white space-y-2">
+            <div class="flex items-center justify-between">
+                <span class="font-bold text-zinc-200">[+] Disclosed Internal Archive Data</span>
+                <span class="text-[10px] px-2 py-0.5 bg-white text-black font-bold rounded-md">Archive Discovered</span>
+            </div>
+            <pre class="bg-black p-3 rounded-md text-zinc-200 border border-zinc-800 select-all overflow-x-auto">{{ flag_content }}</pre>
+        </div>
+        {% endif %}
+
+        <div class="rounded-md border border-zinc-800 overflow-hidden bg-black shadow-sm">
+            <div class="px-4 py-2 bg-[#0c0c0e] border-b border-zinc-800 flex items-center justify-between font-mono text-xs">
+                <span class="text-zinc-400">Probe Response Output:</span>
+            </div>
+            <div class="p-4 min-h-[140px] font-mono text-xs text-zinc-200 leading-relaxed overflow-x-auto select-all">
+                {% if probe_result %}
+                    <pre class="whitespace-pre-wrap">{{ probe_result }}</pre>
+                {% else %}
+                    <span class="text-zinc-600 italic">No probe executed. Enter a route identifier such as /robots.txt above.</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'recon-hint', 'recon-vuln', 'recon-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'recon-vuln', 'recon-hint', 'recon-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'recon-fix', 'recon-hint', 'recon-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="recon-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>&bull; Crawlers search for governance directives at well-known root paths such as /robots.txt and /.well-known/security.txt.</p>
+                <p>&bull; Examine disallowed directories identified in the robots configuration to discover unlinked assets.</p>
+            </div>
+
+            <div id="recon-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ recon_vuln_code }}</code></pre>
+            </div>
+
+            <div id="recon-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ recon_fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
