@@ -1,0 +1,5 @@
+=== SECURITY TRAINING LAB - ROOT FLAG ===
+FLAG{c0mm4nd_1nj3ct10n_r00t_sh3ll_9824}
+
+=== CONFIDENTIAL SYSTEM RECORD (LFI FLAG) ===
+FLAG{p4th_tr4v3rs4l_lfi_r34d_syst3m_f1l3s_1048}

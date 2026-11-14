@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Cross-Site Scripting Lab | Web Security Laboratory{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">Module: XSS</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-700 text-white font-mono">2 Exercises</span>
+            </div>
+            <h1 class="text-xl font-bold text-white mt-1">Cross-Site Scripting (XSS)</h1>
+            <p class="text-xs text-zinc-400 mt-1 font-mono">
+                Analyze client-side injection vulnerabilities arising from unescaped dynamic content rendered in the document object model.
+            </p>
+        </div>
+        <div class="flex items-center space-x-2">
+            <a href="#reflected" class="px-3 py-1.5 text-xs font-mono rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700">Reflected XSS</a>
+            <a href="#stored" class="px-3 py-1.5 text-xs font-mono rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700">Stored XSS & Bot</a>
+        </div>
+    </div>
+
+    <div id="reflected" class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 01</span>
+                <h2 class="text-base font-bold text-white">Reflected Query Parameter Injection</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-zinc-800 text-zinc-300 border border-zinc-700">Introductory</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            Input passed to the search parameter is echoed directly into the document body. Examine how unencoded markup executes inside the user's active session.
+        </p>
+
+        <div class="space-y-4">
+            <form action="/labs/xss#reflected" method="GET" class="flex items-center space-x-2">
+                <input type="text" name="q" value="{{ q }}" placeholder="Enter query string..."
+                    class="flex-grow px-3 py-2 text-xs bg-zinc-950 border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+                <button type="submit" class="px-4 py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                    Submit
+                </button>
+            </form>
+
+            <div class="p-4 bg-zinc-950 rounded-md border border-zinc-800">
+                <span class="text-[11px] text-zinc-500 font-mono block mb-1">Rendered Response Context:</span>
+                <div class="p-3 bg-black border border-zinc-800 rounded-md min-h-[48px] text-xs text-zinc-200 font-mono">
+                    {% if q %}
+                        <div class="text-white">
+                            Search Results for: <span>{{ q | safe }}</span>
+                        </div>
+                    {% else %}
+                        <span class="text-zinc-500 italic">No query provided.</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="p-3 bg-zinc-900 border border-zinc-700 rounded-md flex items-center justify-between text-xs">
+                <span class="text-zinc-300 font-mono">Active Browser Session Cookie Inspection:</span>
+                <button onclick="alert(document.cookie)" class="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-white font-mono text-xs rounded-md border border-zinc-600 transition-colors">
+                    Inspect document.cookie
+                </button>
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'xss-ref-hint', 'xss-ref-vuln', 'xss-ref-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'xss-ref-vuln', 'xss-ref-hint', 'xss-ref-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'xss-ref-fix', 'xss-ref-hint', 'xss-ref-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="xss-ref-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>• Observe how the template engine handles output filtering. If contextual encoding is bypassed, the browser interprets HTML syntax as code.</p>
+                <p>• Consider HTML elements that trigger script execution either automatically or via attribute event handlers.</p>
+            </div>
+
+            <div id="xss-ref-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ reflected_code_snippet }}</code></pre>
+            </div>
+
+            <div id="xss-ref-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ reflected_fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div id="stored" class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 02</span>
+                <h2 class="text-base font-bold text-white">Stored XSS & Administrator Agent Simulation</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-white text-black font-bold">Advanced</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            User submissions stored in the database are subsequently rendered to all visiting clients. Dispatching the administrator agent launches an automated browser that navigates to the page with active administrator credentials.
+        </p>
+
+        {% if bot_status %}
+        <div class="p-4 rounded-md border font-mono text-xs bg-zinc-900 border-zinc-600 text-zinc-100">
+            <p class="font-bold mb-1">Agent Dispatch Status:</p>
+            <p>{{ bot_status }}</p>
+        </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 space-y-4">
+                <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider">Submit Entry</h3>
+                <form action="/labs/xss/guestbook" method="POST" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-mono text-zinc-400 mb-1">Author</label>
+                        <input type="text" name="author" placeholder="User Identifier"
+                            class="w-full px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono text-zinc-400 mb-1">Content</label>
+                        <textarea name="comment" rows="3" placeholder="Enter message text..." required
+                            class="w-full px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white"></textarea>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button type="submit" class="px-4 py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                            Publish Entry
+                        </button>
+                    </div>
+                </form>
+
+                <div class="pt-3 border-t border-zinc-800 flex items-center justify-between">
+                    <form action="/labs/xss/report" method="POST">
+                        <button type="submit" class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-semibold rounded-md font-mono transition-colors flex items-center space-x-1.5 border border-zinc-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                            <span>Trigger Admin Inspection</span>
+                        </button>
+                    </form>
+                    <form action="/labs/xss/guestbook/reset" method="POST">
+                        <button type="submit" class="text-xs text-zinc-500 hover:text-zinc-300 underline font-mono">Clear Entries</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider mb-3">Published Records</h3>
+                    <div class="space-y-3 max-h-72 overflow-y-auto pr-1">
+                        {% for c in comments %}
+                        <div class="p-3 bg-[#121214] rounded-md border border-zinc-800 font-mono">
+                            <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400 mb-1">
+                                <span class="font-bold text-white">{{ c.author }}</span>
+                                <span>{{ c.created_at }}</span>
+                            </div>
+                            <div class="text-xs text-zinc-200 break-words">
+                                {{ c.comment | safe }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'xss-stored-hint', 'xss-stored-vuln', 'xss-stored-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'xss-stored-vuln', 'xss-stored-hint', 'xss-stored-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'xss-stored-fix', 'xss-stored-hint', 'xss-stored-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="xss-stored-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>• Injected payloads persist in storage and execute in the context of any user who loads the resource, including automated inspection agents.</p>
+                <p>• Review how client-side scripts can access non-HttpOnly document attributes and transmit state information across network boundaries.</p>
+            </div>
+
+            <div id="xss-stored-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ stored_code_snippet }}</code></pre>
+            </div>
+
+            <div id="xss-stored-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ stored_fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

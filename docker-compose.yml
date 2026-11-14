@@ -1,0 +1,33 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ctf-web-app
+    ports:
+      - "0.0.0.0:8080:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - INTERNAL_ADMIN_URL=http://internal-admin:9000
+    networks:
+      - lab-net
+    depends_on:
+      - internal-admin
+    restart: unless-stopped
+
+  internal-admin:
+    build:
+      context: ./internal_admin
+      dockerfile: Dockerfile
+    container_name: ctf-internal-admin
+    expose:
+      - "9000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - lab-net
+    restart: unless-stopped
+
+networks:
+  lab-net:
+    driver: bridge

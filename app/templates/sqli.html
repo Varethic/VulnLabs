@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}SQL Injection Lab | Web Security Laboratory{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">Module: SQLi</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-700 text-white font-mono">2 Exercises</span>
+            </div>
+            <h1 class="text-xl font-bold text-white mt-1">Structured Query Language Injection</h1>
+            <p class="text-xs text-zinc-400 mt-1 font-mono">
+                Analyze SQL query generation flaws where unvalidated input alters the database query logic.
+            </p>
+        </div>
+        <div class="flex items-center space-x-2">
+            <a href="#auth-bypass" class="px-3 py-1.5 text-xs font-mono rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700">Authentication Bypass</a>
+            <a href="#union-search" class="px-3 py-1.5 text-xs font-mono rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700">UNION Query Exfiltration</a>
+        </div>
+    </div>
+
+    <div id="auth-bypass" class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 01</span>
+                <h2 class="text-base font-bold text-white">Authentication Logic Circumvention</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-zinc-800 text-zinc-300 border border-zinc-700">Introductory</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            The login portal verifies credentials against the database. Examine how user-provided strings are incorporated into the verification statement. Circumvent authentication checks to establish an administrator session.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800">
+                <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider mb-3">Authentication Form</h3>
+                <form action="/labs/sqli/login" method="POST" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-mono text-zinc-400 mb-1">Username</label>
+                        <input type="text" name="username" value="{{ username_val or '' }}" placeholder="Enter username" required
+                            class="w-full px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono text-zinc-400 mb-1">Password</label>
+                        <input type="password" name="password" placeholder="Enter password"
+                            class="w-full px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+                    </div>
+                    <button type="submit" class="w-full py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                        Authenticate &rarr;
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider mb-2">Execution Stream</h3>
+
+                    {% if executed_login_query %}
+                    <div class="mb-3">
+                        <span class="text-[11px] text-zinc-500 font-mono block">Query String:</span>
+                        <code class="block text-xs font-mono bg-black p-2 rounded-md text-zinc-300 border border-zinc-800 break-all">
+                            {{ executed_login_query }}
+                        </code>
+                    </div>
+                    {% endif %}
+
+                    {% if login_error %}
+                    <div class="p-3 bg-zinc-900 border border-zinc-600 text-zinc-200 text-xs rounded-md font-mono">
+                        [!] Database Exception: {{ login_error }}
+                    </div>
+                    {% elif login_result %}
+                        {% if login_result.success %}
+                            <div class="p-4 bg-zinc-900 border border-zinc-600 text-zinc-100 text-xs rounded-md space-y-2">
+                                <p class="font-bold font-mono">{{ login_result.message }}</p>
+                                {% if login_result.flag %}
+                                <div class="mt-2 p-2 bg-black rounded-md border border-white font-mono text-xs text-white select-all">
+                                    Flag: <strong>{{ login_result.flag }}</strong>
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="p-3 bg-zinc-900 border border-zinc-700 text-zinc-400 text-xs rounded-md font-mono">
+                                {{ login_result.message }}
+                            </div>
+                        {% endif %}
+                    {% else %}
+                    <p class="text-xs text-zinc-500 italic font-mono">Submit input to observe database evaluation.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'sqli-auth-hint', 'sqli-auth-vuln', 'sqli-auth-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'sqli-auth-vuln', 'sqli-auth-hint', 'sqli-auth-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'sqli-auth-fix', 'sqli-auth-hint', 'sqli-auth-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="sqli-auth-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>• Consider how SQL parses string literals and delimiters when building queries through string formatting.</p>
+                <p>• Evaluate boolean expressions in SQL clauses and explore how SQL comment operators affect the parser when truncating subsequent conditions.</p>
+            </div>
+
+            <div id="sqli-auth-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ auth_code_snippet }}</code></pre>
+            </div>
+
+            <div id="sqli-auth-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ auth_fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div id="union-search" class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 02</span>
+                <h2 class="text-base font-bold text-white">UNION Query Exfiltration</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-zinc-700 text-zinc-200 border border-zinc-600">Intermediate</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            The catalog search endpoint projects database rows directly into the resulting table. Identify the column count and structure of the original query to extract records from other database tables.
+        </p>
+
+        <form action="/labs/sqli" method="GET" class="flex items-center space-x-2">
+            <input type="text" name="q" value="{{ q }}" placeholder="Search catalog..."
+                class="flex-grow px-3 py-2 text-xs bg-zinc-950 border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+            <button type="submit" class="px-4 py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                Search
+            </button>
+            <a href="/labs/sqli" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs rounded-md font-mono border border-zinc-700">Clear</a>
+        </form>
+
+        {% if executed_search_query %}
+        <div class="p-3 bg-zinc-950 rounded-md border border-zinc-800">
+            <span class="text-[11px] text-zinc-500 font-mono block mb-1">Executed Statement:</span>
+            <code class="text-xs font-mono text-zinc-200 break-all">{{ executed_search_query }}</code>
+        </div>
+        {% endif %}
+
+        {% if search_error %}
+        <div class="p-3 bg-zinc-900 border border-zinc-600 text-zinc-200 text-xs rounded-md font-mono">
+            [!] Database Exception: {{ search_error }}
+        </div>
+        {% endif %}
+
+        <div class="overflow-x-auto rounded-md border border-zinc-800">
+            <table class="w-full text-left text-xs text-zinc-300">
+                <thead class="bg-zinc-950 text-zinc-400 font-mono uppercase text-[10px] border-b border-zinc-800">
+                    <tr>
+                        <th class="p-3">ID</th>
+                        <th class="p-3">Item Name</th>
+                        <th class="p-3">Category</th>
+                        <th class="p-3">Price</th>
+                        <th class="p-3">Description</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-800 bg-[#121214]">
+                    {% if search_results %}
+                        {% for row in search_results %}
+                        <tr class="hover:bg-zinc-900/60 font-mono transition-colors">
+                            <td class="p-3 text-zinc-400">{{ row.id }}</td>
+                            <td class="p-3 font-semibold text-white">{{ row.name }}</td>
+                            <td class="p-3 text-zinc-300">{{ row.category }}</td>
+                            <td class="p-3 text-white font-bold">{{ row.price }}</td>
+                            <td class="p-3 text-zinc-200 select-all">{{ row.description }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="p-4 text-center text-zinc-500 italic font-mono">
+                                No records returned.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'sqli-union-hint', 'sqli-union-vuln', 'sqli-union-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'sqli-union-vuln', 'sqli-union-hint', 'sqli-union-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'sqli-union-fix', 'sqli-union-hint', 'sqli-union-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="sqli-union-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>• The UNION operator appends result sets from multiple SELECT statements. Both queries must project an equal number of columns with compatible datatypes.</p>
+                <p>• Determine the column count of the primary query, then map fields from target tables into corresponding positions.</p>
+            </div>
+
+            <div id="sqli-union-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ union_code_snippet }}</code></pre>
+            </div>
+
+            <div id="sqli-union-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ union_fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

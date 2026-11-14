@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}OS Command Injection Lab | Web Security Laboratory{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">Module: System Execution</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-white text-black font-mono font-bold">1 Exercise</span>
+            </div>
+            <h1 class="text-xl font-bold text-white mt-1">Operating System Command Injection</h1>
+            <p class="text-xs text-zinc-400 mt-1 font-mono">
+                Analyze vulnerabilities where unvalidated parameters are concatenated into system shell commands.
+            </p>
+        </div>
+        <div class="flex items-center space-x-2 font-mono text-xs">
+            <span class="px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-600 text-white font-semibold">Remote Execution</span>
+        </div>
+    </div>
+
+    <div class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 01</span>
+                <h2 class="text-base font-bold text-white">System Shell Command Injection</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-white text-black font-bold">Advanced</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            The diagnostic network tool performs ICMP reachability checks by invoking the operating system shell. Determine whether shell metacharacters can be introduced to execute auxiliary commands on the host environment.
+        </p>
+
+        <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 space-y-4">
+            <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider">Network Diagnostic Utility</h3>
+            <form action="/labs/cmdi/ping" method="POST" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-mono text-zinc-400 mb-1">Target Host / Address</label>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" name="target" value="{{ target or '127.0.0.1' }}" placeholder="127.0.0.1" required
+                            class="flex-grow px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+                        <button type="submit" class="px-5 py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                            Execute
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="rounded-md border border-zinc-800 overflow-hidden bg-black shadow-sm">
+            <div class="px-4 py-2 bg-[#0c0c0e] border-b border-zinc-800 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-md bg-zinc-600 inline-block"></span>
+                    <span class="w-2.5 h-2.5 rounded-md bg-zinc-500 inline-block"></span>
+                    <span class="w-2.5 h-2.5 rounded-md bg-zinc-400 inline-block"></span>
+                    <span class="text-xs font-mono text-zinc-400 ml-2">diagnostic_terminal@host:~</span>
+                </div>
+                {% if executed_command %}
+                <span class="text-[11px] font-mono text-zinc-300 truncate max-w-md">$ {{ executed_command }}</span>
+                {% endif %}
+            </div>
+            <div class="p-4 min-h-[160px] font-mono text-xs text-zinc-200 leading-relaxed overflow-x-auto select-all">
+                {% if output %}
+                    <pre class="whitespace-pre-wrap">{{ output }}</pre>
+                {% else %}
+                    <span class="text-zinc-600 italic">No output. Execute a diagnostic command above.</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'cmdi-hint', 'cmdi-vuln', 'cmdi-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'cmdi-vuln', 'cmdi-hint', 'cmdi-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'cmdi-fix', 'cmdi-hint', 'cmdi-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="cmdi-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>• Review command chaining syntax and separator metacharacters supported by operating system command interpreters.</p>
+                <p>• Consider how command pipelines, conditional operators, and line termination tokens are handled when input is executed in a subshell context.</p>
+            </div>
+
+            <div id="cmdi-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ cmdi_code_snippet }}</code></pre>
+            </div>
+
+            <div id="cmdi-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ cmdi_fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

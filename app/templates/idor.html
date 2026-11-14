@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Broken Object Level Authorization Lab | Web Security Laboratory{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">Module: Access Control</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-700 text-white font-mono">1 Exercise</span>
+            </div>
+            <h1 class="text-xl font-bold text-white mt-1">Insecure Direct Object Reference (IDOR)</h1>
+            <p class="text-xs text-zinc-400 mt-1 font-mono">
+                Analyze authorization flaws where user-supplied object identifiers bypass record-level access restrictions.
+            </p>
+        </div>
+        <div class="flex items-center space-x-2 font-mono text-xs">
+            <span class="text-zinc-400">Authenticated Session:</span>
+            <span class="px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-700 text-white font-semibold">{{ current_user.full_name }} (UID: {{ current_user.user_id }})</span>
+        </div>
+    </div>
+
+    <div class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 01</span>
+                <h2 class="text-base font-bold text-white">Record Ownership Authorization Bypass</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-zinc-800 text-zinc-300 border border-zinc-700">Introductory</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            You are authenticated as <strong class="text-white">{{ current_user.full_name }}</strong>. Review your assigned invoices and analyze how record identifiers are requested from the backend service. Determine whether records belonging to other tenants can be directly referenced.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider">Assigned Records (UID: {{ current_user.user_id }})</h3>
+                </div>
+                <div class="space-y-2.5">
+                    {% for rec in user_receipts %}
+                    <div class="p-3 bg-[#121214] border border-zinc-800 rounded-md flex items-center justify-between text-xs font-mono">
+                        <div>
+                            <span class="font-bold text-white block">{{ rec.title }}</span>
+                            <span class="text-zinc-400">{{ rec.amount }}</span>
+                        </div>
+                        <a href="/labs/idor?receipt_id={{ rec.id }}" class="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-white rounded-md text-xs border border-zinc-700 transition-colors">
+                            View #{{ rec.id }}
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="pt-4 border-t border-zinc-800">
+                    <label class="block text-xs font-mono text-zinc-400 mb-1">Direct Record Query</label>
+                    <form action="/labs/idor" method="GET" class="flex items-center space-x-2">
+                        <input type="number" name="receipt_id" value="{{ requested_id or '' }}" placeholder="Enter record identifier..." required
+                            class="flex-grow px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+                        <button type="submit" class="px-4 py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                            Retrieve
+                        </button>
+                    </form>
+                    <div class="mt-2 text-[11px] text-zinc-500 font-mono">
+                        API Endpoint: <code class="text-zinc-300">/labs/idor/api/receipt/{receipt_id}</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider mb-3">Record Details</h3>
+
+                    {% if selected_receipt %}
+                    <div class="p-4 rounded-md border space-y-3 font-mono text-xs
+                        {% if selected_receipt.is_private %}bg-[#18181b] border-white text-zinc-200{% else %}bg-[#121214] border-zinc-800 text-zinc-300{% endif %}">
+                        <div class="flex items-center justify-between border-b border-zinc-800 pb-2">
+                            <span class="font-bold text-white text-sm">Receipt #{{ selected_receipt.id }}</span>
+                            {% if selected_receipt.user_id != current_user.user_id %}
+                            <span class="px-2 py-0.5 rounded-md bg-white text-black text-[10px] font-bold">
+                                CROSS-TENANT RECORD RETRIEVED
+                            </span>
+                            {% else %}
+                            <span class="px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 text-[10px] font-bold border border-zinc-700">
+                                Assigned Record
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 text-[11px]">
+                            <div>
+                                <span class="text-zinc-500 block">Recipient:</span>
+                                <strong class="text-white">{{ selected_receipt.customer_name }}</strong>
+                            </div>
+                            <div>
+                                <span class="text-zinc-500 block">Owner User ID:</span>
+                                <strong class="text-zinc-200">{{ selected_receipt.user_id }}</strong>
+                            </div>
+                            <div>
+                                <span class="text-zinc-500 block">Amount:</span>
+                                <strong class="text-white font-bold">{{ selected_receipt.amount }}</strong>
+                            </div>
+                            <div>
+                                <span class="text-zinc-500 block">Classification:</span>
+                                <strong class="text-white">{% if selected_receipt.is_private %}Confidential{% else %}Standard{% endif %}</strong>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 border-t border-zinc-800">
+                            <span class="text-zinc-500 block text-[11px] mb-1">Payload Content:</span>
+                            <div class="p-2.5 bg-black rounded-md border border-zinc-800 text-zinc-200 select-all leading-relaxed">
+                                {{ selected_receipt.details }}
+                            </div>
+                        </div>
+                    </div>
+                    {% elif not_found %}
+                    <div class="p-3 bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs rounded-md font-mono">
+                        [!] Record #{{ requested_id }} does not exist.
+                    </div>
+                    {% else %}
+                    <p class="text-xs text-zinc-500 italic font-mono">Select or request a record identifier to inspect output.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'idor-hint', 'idor-vuln', 'idor-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'idor-vuln', 'idor-hint', 'idor-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'idor-fix', 'idor-hint', 'idor-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="idor-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>• Observe whether the application validates that the requested object belongs to the authenticated user ID before returning data.</p>
+                <p>• Evaluate predictable or sequential numbering schemes that permit enumeration of unauthorized resources.</p>
+            </div>
+
+            <div id="idor-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ idor_code_snippet }}</code></pre>
+            </div>
+
+            <div id="idor-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ idor_fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Path Traversal Lab | Web Security Laboratory{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">Module: File Inclusion</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-700 text-white font-mono">1 Exercise</span>
+            </div>
+            <h1 class="text-xl font-bold text-white mt-1">Local File Inclusion & Directory Traversal</h1>
+            <p class="text-xs text-zinc-400 mt-1 font-mono">
+                Analyze path handling routines that allow unconstrained navigation beyond designated document roots.
+            </p>
+        </div>
+        <div class="flex items-center space-x-2 font-mono text-xs">
+            <span class="px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">Filesystem Access</span>
+        </div>
+    </div>
+
+    <div class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 01</span>
+                <h2 class="text-base font-bold text-white">Filesystem Boundary Traversal</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-zinc-700 text-zinc-200 border border-zinc-600">Intermediate</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            The documentation viewer accepts a filename parameter and reads content directly from disk. Evaluate whether directory traversal sequences or absolute paths can be used to inspect files outside the intended base folder.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 space-y-4">
+                <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider">Repository Documents</h3>
+
+                <div class="space-y-2">
+                    {% for f in default_files %}
+                    <div class="p-3 bg-[#121214] border border-zinc-800 rounded-md flex items-center justify-between text-xs font-mono">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                            <span class="text-white">{{ f }}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <a href="/labs/lfi?file={{ f }}" class="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-white rounded-md text-xs border border-zinc-700 transition-colors">
+                                View
+                            </a>
+                            <a href="/labs/lfi/download?file={{ f }}" target="_blank" class="px-2.5 py-1 bg-black hover:bg-zinc-900 text-zinc-300 rounded-md text-xs border border-zinc-800 transition-colors">
+                                Raw
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="pt-4 border-t border-zinc-800">
+                    <label class="block text-xs font-mono text-zinc-400 mb-1">File Path Query (?file=)</label>
+                    <form action="/labs/lfi" method="GET" class="flex items-center space-x-2">
+                        <input type="text" name="file" value="{{ selected_file or '' }}" placeholder="Enter file path..." required
+                            class="flex-grow px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+                        <button type="submit" class="px-4 py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                            Load
+                        </button>
+                    </form>
+                    <div class="mt-2 text-[11px] text-zinc-500 font-mono">
+                        Direct Endpoint: <a href="/labs/lfi/download?file={{ selected_file or 'company_policy.txt' }}" class="text-white hover:underline">/labs/lfi/download?file={{ selected_file or '...' }}</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider">File Content Stream</h3>
+                        {% if resolved_path %}
+                        <span class="text-[10px] font-mono text-zinc-500 truncate max-w-xs" title="{{ resolved_path }}">
+                            Resolved: {{ resolved_path }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    {% if file_error %}
+                    <div class="p-3 bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs rounded-md font-mono">
+                        {{ file_error }}
+                    </div>
+                    {% elif file_content is not none %}
+                    <div class="p-4 bg-black border border-zinc-800 rounded-md font-mono text-xs text-zinc-200 select-all overflow-x-auto min-h-[160px] whitespace-pre-wrap">
+                        {{ file_content }}
+                    </div>
+                    {% else %}
+                    <p class="text-xs text-zinc-500 italic font-mono">Select a document or specify a target path to inspect content.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'lfi-hint', 'lfi-vuln', 'lfi-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'lfi-vuln', 'lfi-hint', 'lfi-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'lfi-fix', 'lfi-hint', 'lfi-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="lfi-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>• Examine relative directory traversal operators across hierarchical file systems.</p>
+                <p>• Evaluate absolute file paths and canonical path resolution when input parameters are directly concatenated into filesystem read routines.</p>
+            </div>
+
+            <div id="lfi-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ lfi_code_snippet }}</code></pre>
+            </div>
+
+            <div id="lfi-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ lfi_fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,6 @@
+=== APPLICATION CHANGELOG ===
+v1.0.0: Initial release of the Security Training Lab.
+v1.0.1: Added network diagnostics ping module.
+v1.0.2: Implemented guestbook comments.
+v1.0.3: Added customer invoice receipt viewer.
+v1.0.4: Disabled template auto-escaping for rich comment formatting (TODO: Review security implications!).

@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}JSON Web Token Lab | Web Security Laboratory{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">Module: Authentication</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-700 text-white font-mono">1 Exercise</span>
+            </div>
+            <h1 class="text-xl font-bold text-white mt-1">JSON Web Token (JWT) Security</h1>
+            <p class="text-xs text-zinc-400 mt-1 font-mono">
+                Analyze token structure, claim deserialization, and signature validation enforcement.
+            </p>
+        </div>
+        <div class="flex items-center space-x-2 font-mono text-xs">
+            <span class="px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">Cryptographic Verification</span>
+        </div>
+    </div>
+
+    <div class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 01</span>
+                <h2 class="text-base font-bold text-white">Cryptographic Signature Verification Bypass</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-zinc-700 text-zinc-200 border border-zinc-600">Intermediate</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            Users obtain a signed token asserting their identity and role claims. Inspect the token structure and test whether the backend validates the signature or permits unauthorized claim modifications to elevate privileges.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider">Token Submission</h3>
+                    <form action="/labs/jwt/login-guest" method="POST">
+                        <button type="submit" class="px-2 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-md text-[11px] font-mono border border-zinc-700 transition-colors">
+                            Generate Sample Token
+                        </button>
+                    </form>
+                </div>
+
+                <form action="/labs/jwt/admin-vault" method="POST" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-mono text-zinc-400 mb-1">Bearer Token (Header.Payload.Signature)</label>
+                        <textarea name="token" rows="4" required
+                            class="w-full p-2.5 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white leading-relaxed select-all">{{ submitted_token }}</textarea>
+                    </div>
+                    <button type="submit" class="w-full py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                        Submit Token &rarr;
+                    </button>
+                </form>
+
+                <div class="p-3 bg-[#121214] border border-zinc-800 rounded-md text-[11px] font-mono text-zinc-400 space-y-1">
+                    <span class="text-zinc-200 block font-bold">Standard Guest Claims:</span>
+                    <code>{"sub": "guest", "role": "user"}</code>
+                </div>
+            </div>
+
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider mb-3">Authorization Response</h3>
+
+                    {% if vault_error %}
+                    <div class="p-3 bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs rounded-md font-mono">
+                        {{ vault_error }}
+                    </div>
+                    {% elif vault_result %}
+                        <div class="p-4 rounded-md border space-y-3 font-mono text-xs
+                            {% if vault_result.success %}bg-zinc-900 border-white text-zinc-100{% else %}bg-[#121214] border-zinc-800 text-zinc-300{% endif %}">
+                            <div class="flex items-center justify-between border-b border-zinc-800 pb-2">
+                                <span class="font-bold text-white">Status:</span>
+                                {% if vault_result.success %}
+                                <span class="px-2 py-0.5 rounded-md bg-white text-black text-[10px] font-bold">
+                                    AUTHORIZED
+                                </span>
+                                {% else %}
+                                <span class="px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-400 text-[10px] font-bold border border-zinc-700">
+                                    UNAUTHORIZED
+                                </span>
+                                {% endif %}
+                            </div>
+                            <p class="leading-relaxed">{{ vault_result.message }}</p>
+
+                            {% if vault_result.payload %}
+                            <div class="pt-2 border-t border-zinc-800">
+                                <span class="text-zinc-500 block text-[10px] mb-1">Parsed Token Claims:</span>
+                                <pre class="p-2 bg-black rounded-md text-[11px] text-zinc-300 overflow-x-auto"><code>{{ vault_result.payload }}</code></pre>
+                            </div>
+                            {% endif %}
+
+                            {% if vault_result.flag %}
+                            <div class="mt-2 p-2 bg-black border border-white rounded-md text-xs text-white select-all">
+                                Flag: <strong>{{ vault_result.flag }}</strong>
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                    <p class="text-xs text-zinc-500 italic font-mono">Submit a token to evaluate authorization state.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'jwt-hint', 'jwt-vuln', 'jwt-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'jwt-vuln', 'jwt-hint', 'jwt-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'jwt-fix', 'jwt-hint', 'jwt-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="jwt-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>• Differentiate between reading token claim segments and validating cryptographic integrity.</p>
+                <p>• Consider how backend libraries behave when signature verification is disabled or when algorithm parameters in the token header are manipulated.</p>
+            </div>
+
+            <div id="jwt-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ jwt_vuln_code }}</code></pre>
+            </div>
+
+            <div id="jwt-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ jwt_fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

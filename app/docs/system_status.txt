@@ -1,0 +1,7 @@
+=== SYSTEM STATUS REPORT ===
+Server OS: Linux (Containerized) / Windows Host Ready
+Web Server: Uvicorn ASGI
+Application: FastAPI CTF Training Lab
+Database: SQLite3 (/app/labs.db)
+Critical Flag Storage: /flag.txt (Root filesystem)
+All services operational.

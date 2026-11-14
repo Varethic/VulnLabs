@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Concurrency & Race Condition Lab | Web Security Laboratory{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">Module: Concurrency</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-white text-black font-bold font-mono">1 Exercise</span>
+            </div>
+            <h1 class="text-xl font-bold text-white mt-1">Race Condition (TOCTOU) Flaws</h1>
+            <p class="text-xs text-zinc-400 mt-1 font-mono">
+                Analyze asynchronous execution windows between validation checks and state modifications.
+            </p>
+        </div>
+        <div class="flex items-center space-x-2 font-mono text-xs">
+            <span class="px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">TOCTOU Analysis</span>
+        </div>
+    </div>
+
+    <div class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 01</span>
+                <h2 class="text-base font-bold text-white">Asynchronous Validation State Desynchronization</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-white text-black font-bold">Advanced</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            Users possess an initial account balance and a single-use promotional code. The redemption handler evaluates eligibility prior to executing asynchronous processing and committing updates. Analyze whether concurrent transactions can interleave within this window to bypass single-use constraints.
+        </p>
+
+        {% if action_message %}
+        <div class="p-4 rounded-md border font-mono text-xs
+            {% if action_type == 'success' %}bg-zinc-900 border-white text-zinc-100{% elif action_type == 'error' %}bg-zinc-900 border-zinc-600 text-zinc-300{% else %}bg-zinc-900 border-zinc-700 text-zinc-300{% endif %}">
+            <p class="font-bold">{{ action_message }}</p>
+        </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider">Account Balance</h3>
+                    <form action="/labs/race/reset" method="POST">
+                        <button type="submit" class="px-2 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-md text-[11px] font-mono border border-zinc-700 transition-colors">
+                            Reset State
+                        </button>
+                    </form>
+                </div>
+
+                <div class="p-4 bg-[#121214] border border-zinc-800 rounded-md font-mono text-xs space-y-2">
+                    <div class="flex items-baseline justify-between">
+                        <span class="text-zinc-400">Current Balance:</span>
+                        <span class="text-2xl font-bold text-white font-mono">${{ "%.2f"|format(wallet.balance) }}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-[11px] pt-2 border-t border-zinc-800">
+                        <span class="text-zinc-400">Promotional Code Status (FREE10):</span>
+                        <span class="font-bold {% if wallet.coupon_used %}text-zinc-400{% else %}text-white{% endif %}">
+                            {% if wallet.coupon_used %}REDEEMED{% else %}AVAILABLE{% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <form action="/labs/race/redeem" method="POST" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-mono text-zinc-400 mb-1">Redeem Code</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="text" name="code" value="{{ promo_code }}" placeholder="FREE10" required
+                                class="flex-grow px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white uppercase">
+                            <button type="submit" class="px-4 py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                                Redeem
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="pt-3 border-t border-zinc-800">
+                    <form action="/labs/race/buy-flag" method="POST">
+                        <button type="submit"
+                            class="w-full py-2.5 rounded-md font-mono text-xs font-bold transition-all border
+                            {% if wallet.balance >= flag_cost %}
+                                bg-white text-black hover:bg-zinc-200 border-white
+                            {% else %}
+                                bg-zinc-900 text-zinc-500 border-zinc-800 hover:border-zinc-700
+                            {% endif %}">
+                            Acquire Premium Flag Record (${{ "%.2f"|format(flag_cost) }}) &rarr;
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider mb-2">Concurrency Test Reference</h3>
+                    <p class="text-xs text-zinc-400 font-mono mb-3 leading-relaxed">
+                        To test race condition vulnerabilities, execute simultaneous asynchronous HTTP requests:
+                    </p>
+                    <pre class="bg-black p-3 rounded-md text-[10px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto select-all"><code>import asyncio
+import httpx
+
+async def execute():
+    url = "http://127.0.0.1:8000/labs/race/redeem"
+    async with httpx.AsyncClient() as client:
+        tasks = [client.post(url, data={"code": "FREE10"}) for _ in range(8)]
+        responses = await asyncio.gather(*tasks)
+        for r in responses:
+            print(r.status_code)
+
+asyncio.run(execute())</code></pre>
+                </div>
+                <div class="mt-4 p-2.5 bg-[#121214] border border-zinc-800 rounded-md text-[11px] font-mono text-zinc-400">
+                    Target Endpoint: <code class="text-white">POST /labs/race/redeem</code>
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'race-hint', 'race-vuln', 'race-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'race-vuln', 'race-hint', 'race-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'race-fix', 'race-hint', 'race-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="race-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>• Analyze the execution timeline between the validation phase and the persistence phase.</p>
+                <p>• Consider how uncoordinated concurrent transactions interleave when database records lack pessimistic locking or transactional synchronization.</p>
+            </div>
+
+            <div id="race-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ race_vuln_code }}</code></pre>
+            </div>
+
+            <div id="race-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ race_fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Web Security Laboratory{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"IBM Plex Mono"', 'monospace'],
+                        mono: ['"IBM Plex Mono"', 'monospace'],
+                    },
+                    borderRadius: {
+                        DEFAULT: '0.375rem',
+                        sm: '0.375rem',
+                        md: '0.375rem',
+                        lg: '0.375rem',
+                        xl: '0.375rem',
+                        '2xl': '0.375rem',
+                        '3xl': '0.375rem',
+                        full: '0.375rem',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/style.css?v=5">
+    <script src="/static/js/lab.js"></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-[#0a0a0a] text-zinc-200 min-h-screen flex flex-col antialiased selection:bg-zinc-800 selection:text-white">
+
+    <header class="border-b border-zinc-800 bg-[#0f0f11]/95 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <a href="/" class="flex items-center space-x-2.5 group">
+                    <span class="p-1.5 rounded-md bg-zinc-900 border border-zinc-700 text-white group-hover:border-zinc-400 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </span>
+                    <div>
+                        <span class="text-sm font-bold tracking-tight text-white group-hover:text-zinc-300 transition-colors">CYBER<span class="text-zinc-400">LAB</span></span>
+                        <span class="text-[9px] ml-1 px-1 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono">Training Portal</span>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="hidden lg:flex items-center space-x-1 font-medium text-[11px]">
+                <a href="/" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'dashboard' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
+                    Dashboard
+                </a>
+                <a href="/labs/sqli" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'sqli' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
+                    SQLi
+                </a>
+                <a href="/labs/xss" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'xss' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
+                    XSS
+                </a>
+                <a href="/labs/idor" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'idor' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
+                    IDOR
+                </a>
+                <a href="/labs/cmdi" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'cmdi' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
+                    CMDi
+                </a>
+                <a href="/labs/lfi" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'lfi' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
+                    LFI
+                </a>
+                <a href="/labs/jwt" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'jwt' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
+                    JWT
+                </a>
+                <a href="/labs/ssrf" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'ssrf' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
+                    SSRF
+                </a>
+                <a href="/labs/ssti" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'ssti' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
+                    SSTI
+                </a>
+                <a href="/labs/race" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'race' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
+                    Race
+                </a>
+            </nav>
+
+            <div class="flex items-center space-x-2">
+                <form action="/submit-flag" method="POST" class="flex items-center space-x-1.5">
+                    <input type="text" name="flag" placeholder="FLAG{...}" required
+                        class="w-32 sm:w-44 px-2 py-1.5 text-xs bg-zinc-950 border border-zinc-700 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:border-white font-mono transition-all">
+                    <button type="submit"
+                        class="px-2.5 py-1.5 text-xs font-semibold bg-white hover:bg-zinc-200 text-black rounded-md transition-colors flex items-center space-x-1 border border-white">
+                        <span class="hidden sm:inline">Verify</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    {% if msg or request.query_params.get('msg') %}
+    {% set alert_text = msg or request.query_params.get('msg') %}
+    {% set alert_type = msg_type or request.query_params.get('msg_type', 'info') %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
+        <div class="p-3.5 rounded-md border flex items-center justify-between transition-all bg-zinc-900 border-zinc-700 text-zinc-100">
+            <div class="flex items-center space-x-2.5">
+                <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold uppercase border
+                    {% if alert_type == 'success' %}bg-white text-black border-white{% elif alert_type == 'error' %}bg-zinc-800 text-zinc-200 border-zinc-600{% else %}bg-zinc-800 text-zinc-300 border-zinc-700{% endif %}">
+                    {{ alert_type }}
+                </span>
+                <span class="text-xs font-medium font-mono text-zinc-200">{{ alert_text }}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-zinc-400 hover:text-white">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    </div>
+    {% endif %}
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="border-t border-zinc-800 bg-[#0f0f11] py-6 text-center text-xs text-zinc-500 font-mono">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div>
+                <span class="font-semibold text-zinc-400">Cybersecurity Educational Laboratory</span>
+            </div>
+            <div class="flex items-center space-x-3 text-zinc-400 text-[11px]">
+                <span>FastAPI Security Workbench</span>
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
