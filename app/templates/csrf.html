@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}CSRF Lab | Web Security Laboratory{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">Module: Session Integrity</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-700 text-white font-mono">1 Exercise</span>
+            </div>
+            <h1 class="text-xl font-bold text-white mt-1">Cross-Site Request Forgery (CSRF)</h1>
+            <p class="text-xs text-zinc-400 mt-1 font-mono">
+                Analyze state-changing HTTP requests executing without unpredictability tokens or origin verification.
+            </p>
+        </div>
+        <div class="flex items-center space-x-2 font-mono text-xs">
+            <span class="px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">Missing Anti-CSRF Token</span>
+        </div>
+    </div>
+
+    <div class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 01</span>
+                <h2 class="text-base font-bold text-white">Unprotected State-Changing Action</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-zinc-700 text-zinc-200 border border-zinc-600">Intermediate</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            You are logged into an active session with cookie <code class="text-white bg-zinc-800 px-1 py-0.5 rounded-md">csrf_session</code>. The email modification endpoint does not require anti-CSRF synchronization tokens. Craft an autonomous submission simulating a cross-origin forgery to update the account email.
+        </p>
+
+        {% if message %}
+        <div class="p-3 bg-zinc-900 border border-zinc-700 text-zinc-200 text-xs rounded-md font-mono">
+            {{ message }}
+        </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider">Target Account Profile</h3>
+                    <form action="/labs/csrf/reset" method="POST">
+                        <button type="submit" class="text-xs text-zinc-500 hover:text-zinc-300 underline font-mono">Reset State</button>
+                    </form>
+                </div>
+
+                <div class="p-4 bg-[#121214] border border-zinc-800 rounded-md font-mono text-xs space-y-2">
+                    <div class="flex justify-between border-b border-zinc-800 pb-2">
+                        <span class="text-zinc-500">Username:</span>
+                        <span class="text-white font-bold">{{ account.username }}</span>
+                    </div>
+                    <div class="flex justify-between border-b border-zinc-800 pb-2">
+                        <span class="text-zinc-500">Registered Email:</span>
+                        <span class="text-zinc-200 select-all">{{ account.email }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-zinc-500">Account Balance:</span>
+                        <span class="text-white font-bold">${{ "%.2f"|format(account.balance) }}</span>
+                    </div>
+                </div>
+
+                <form action="/labs/csrf/change-email" method="POST" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-mono text-zinc-400 mb-1">New Email Address</label>
+                        <input type="email" name="email" value="{{ account.email }}" required
+                            class="w-full px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+                    </div>
+                    <button type="submit" class="w-full py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                        Update Email &rarr;
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider mb-3">CSRF Exploit Vector Preview</h3>
+                    <p class="text-xs text-zinc-400 font-mono mb-2">Simulated cross-origin HTML payload:</p>
+                    <pre class="bg-black p-3 rounded-md text-[10px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto select-all"><code>&lt;form action="http://127.0.0.1:8000/labs/csrf/change-email" method="POST"&gt;
+  &lt;input type="hidden" name="email" value="attacker@exploit.local" /&gt;
+&lt;/form&gt;
+&lt;script&gt;document.forms[0].submit();&lt;/script&gt;</code></pre>
+
+                    {% if flag %}
+                    <div class="mt-4 p-3 bg-zinc-900 border border-white rounded-md text-white font-mono text-xs select-all">
+                        Flag: <strong>{{ flag }}</strong>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'csrf-hint', 'csrf-vuln', 'csrf-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'csrf-vuln', 'csrf-hint', 'csrf-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'csrf-fix', 'csrf-hint', 'csrf-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="csrf-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>• Observe cookie SameSite attributes and whether session identifiers are transmitted automatically during cross-site requests.</p>
+                <p>• Examine whether the receiving endpoint validates cryptographic CSRF tokens or compares Sec-Fetch-Site and Origin header metadata.</p>
+            </div>
+
+            <div id="csrf-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ vuln_code }}</code></pre>
+            </div>
+
+            <div id="csrf-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

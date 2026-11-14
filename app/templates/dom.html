@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}DOM XSS Lab | Web Security Laboratory{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">Module: Client-Side Injection</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-700 text-white font-mono">1 Exercise</span>
+            </div>
+            <h1 class="text-xl font-bold text-white mt-1">DOM-Based Cross-Site Scripting</h1>
+            <p class="text-xs text-zinc-400 mt-1 font-mono">
+                Analyze client-side execution flows where data from untrusted DOM sources flows into raw execution sinks.
+            </p>
+        </div>
+        <div class="flex items-center space-x-2 font-mono text-xs">
+            <span class="px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">Client Execution Sink</span>
+        </div>
+    </div>
+
+    <div class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 01</span>
+                <h2 class="text-base font-bold text-white">Client Execution Sink Injection</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-zinc-700 text-zinc-200 border border-zinc-600">Intermediate</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            The profile greeting banner extracts user parameters from <code class="text-white bg-zinc-800 px-1 py-0.5 rounded-md">window.location.search</code> or <code class="text-white bg-zinc-800 px-1 py-0.5 rounded-md">window.location.hash</code> and directly updates the page using <code class="text-white bg-zinc-800 px-1 py-0.5 rounded-md">element.innerHTML</code>. Inject client-side execution markup to evaluate JavaScript.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 space-y-4">
+                <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider">Client Source Simulator</h3>
+                <form action="/labs/dom-xss" method="GET" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-mono text-zinc-400 mb-1">Nickname Parameter (?nickname=)</label>
+                        <input type="text" name="nickname" id="nick-input" value="{{ nickname }}" placeholder="Enter display nickname..." required
+                            class="w-full px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+                    </div>
+                    <button type="submit" class="w-full py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                        Render Client DOM &rarr;
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider mb-3">Live Client DOM Execution Sink</h3>
+                    <div class="p-4 bg-[#121214] border border-zinc-800 rounded-md font-mono text-xs text-zinc-200 min-h-[56px] flex items-center">
+                        <div id="greeting-banner">
+                            Welcome, <span id="target-sink" class="font-bold text-white"></span>
+                        </div>
+                    </div>
+
+                    {% if flag %}
+                    <div class="mt-4 p-3 bg-zinc-900 border border-white rounded-md text-white font-mono text-xs select-all">
+                        Flag: <strong>{{ flag }}</strong>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'dom-hint', 'dom-vuln', 'dom-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'dom-vuln', 'dom-hint', 'dom-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'dom-fix', 'dom-hint', 'dom-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="dom-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>• Differentiate between server-side reflection and purely client-side DOM sources like <code class="text-white">location.hash</code> or <code class="text-white">location.search</code>.</p>
+                <p>• Observe how assigning unsanitized strings directly to <code class="text-white">innerHTML</code> forces the browser engine to parse HTML tags and event handlers.</p>
+            </div>
+
+            <div id="dom-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ vuln_code }}</code></pre>
+            </div>
+
+            <div id="dom-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const nick = params.get('nickname') || (window.location.hash ? decodeURIComponent(window.location.hash.substring(1)) : 'Guest');
+    const el = document.getElementById('target-sink');
+    if (el) {
+      el.innerHTML = nick;
+    }
+  })();
+</script>
+{% endblock %}

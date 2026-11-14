@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Cryptographic Failures Lab | Web Security Laboratory{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">Module: Cryptography</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-700 text-white font-mono">1 Exercise</span>
+            </div>
+            <h1 class="text-xl font-bold text-white mt-1">Weak Pseudo-Random Number Generation (PRNG)</h1>
+            <p class="text-xs text-zinc-400 mt-1 font-mono">
+                Analyze predictable token generation flaws using deterministic time-seeded linear congruential algorithms.
+            </p>
+        </div>
+        <div class="flex items-center space-x-2 font-mono text-xs">
+            <span class="px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">Predictable State</span>
+        </div>
+    </div>
+
+    <div class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 01</span>
+                <h2 class="text-base font-bold text-white">Time-Seeded Token Prediction</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-zinc-700 text-zinc-200 border border-zinc-600">Intermediate</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            The password reset mechanism generates a 6-digit verification code using standard <code class="text-white bg-zinc-800 px-1 py-0.5 rounded-md">random.seed()</code> initialized with the server epoch timestamp. Predict the output token to bypass account recovery.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 space-y-4">
+                <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider">Step 1: Dispatch Reset Code</h3>
+                <form action="/labs/crypto/request-reset" method="POST" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-mono text-zinc-400 mb-1">Target Account Email</label>
+                        <input type="email" name="email" value="admin@academy.local" required
+                            class="w-full px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+                    </div>
+                    <button type="submit" class="w-full py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                        Generate Verification Token &rarr;
+                    </button>
+                </form>
+
+                {% if token_info %}
+                <div class="p-3 bg-[#121214] border border-zinc-800 rounded-md font-mono text-xs space-y-1">
+                    <div class="flex justify-between">
+                        <span class="text-zinc-500">Seed Timestamp:</span>
+                        <span class="text-white font-bold select-all">{{ token_info.seed_timestamp }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-zinc-500">Status:</span>
+                        <span class="text-zinc-300">{{ token_info.hint }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 space-y-4">
+                <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider">Step 2: Submit Predicted Token</h3>
+                <form action="/labs/crypto/verify-token" method="POST" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-mono text-zinc-400 mb-1">Target Account Email</label>
+                        <input type="email" name="email" value="admin@academy.local" required
+                            class="w-full px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono text-zinc-400 mb-1">Predicted 6-Digit Code</label>
+                        <input type="text" name="token" placeholder="e.g. 581920" required
+                            class="w-full px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+                    </div>
+                    <button type="submit" class="w-full py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                        Verify Token &rarr;
+                    </button>
+                </form>
+
+                {% if verification_result %}
+                <div class="p-3 bg-zinc-900 border {% if verification_result.success %}border-white text-white{% else %}border-zinc-700 text-zinc-400{% endif %} rounded-md font-mono text-xs">
+                    {{ verification_result.message }}
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="p-3 bg-zinc-900 border border-white rounded-md text-white font-mono text-xs select-all">
+                    Flag: <strong>{{ flag }}</strong>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'cryp-hint', 'cryp-vuln', 'cryp-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'cryp-vuln', 'cryp-hint', 'cryp-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'cryp-fix', 'cryp-hint', 'cryp-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="cryp-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>• Standard pseudo-random number generators (such as Mersenne Twister) produce entirely deterministic sequences when initialized with identical seed values.</p>
+                <p>• Evaluate Python script commands to reproduce the generator state locally using the observed epoch timestamp.</p>
+            </div>
+
+            <div id="cryp-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ vuln_code }}</code></pre>
+            </div>
+
+            <div id="cryp-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

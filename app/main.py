@@ -9,7 +9,28 @@ from fastapi.templating import Jinja2Templates
 
 from app.database import init_db, reset_lab_environment
 from app.flags import CHALLENGES, FLAG_MAP
-from app.labs import sqli, xss, idor, cmdi, lfi, jwt_lab, ssrf, ssti, race
+from app.labs import (
+    sqli,
+    xss,
+    idor,
+    cmdi,
+    lfi,
+    jwt_lab,
+    ssrf,
+    ssti,
+    race,
+    xxe,
+    deserialization,
+    mass_assignment,
+    csrf,
+    redirect,
+    cors,
+    upload,
+    headers_lab,
+    crypto_lab,
+    api_lab,
+    dom_lab,
+)
 
 BASE_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = BASE_DIR / "templates"
@@ -41,6 +62,17 @@ app.include_router(jwt_lab.router)
 app.include_router(ssrf.router)
 app.include_router(ssti.router)
 app.include_router(race.router)
+app.include_router(xxe.router)
+app.include_router(deserialization.router)
+app.include_router(mass_assignment.router)
+app.include_router(csrf.router)
+app.include_router(redirect.router)
+app.include_router(cors.router)
+app.include_router(upload.router)
+app.include_router(headers_lab.router)
+app.include_router(crypto_lab.router)
+app.include_router(api_lab.router)
+app.include_router(dom_lab.router)
 
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 

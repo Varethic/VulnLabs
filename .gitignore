@@ -17,3 +17,5 @@ ENV/
 .vscode/
 *.swp
 *.swo
+app/static/uploads/*
+!app/static/uploads/.gitkeep

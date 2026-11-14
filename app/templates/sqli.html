@@ -9,7 +9,7 @@
         <div>
             <div class="flex items-center space-x-2">
                 <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">Module: SQLi</span>
-                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-700 text-white font-mono">2 Exercises</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-700 text-white font-mono">3 Exercises</span>
             </div>
             <h1 class="text-xl font-bold text-white mt-1">Structured Query Language Injection</h1>
             <p class="text-xs text-zinc-400 mt-1 font-mono">
@@ -17,8 +17,9 @@
             </p>
         </div>
         <div class="flex items-center space-x-2">
-            <a href="#auth-bypass" class="px-3 py-1.5 text-xs font-mono rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700">Authentication Bypass</a>
-            <a href="#union-search" class="px-3 py-1.5 text-xs font-mono rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700">UNION Query Exfiltration</a>
+            <a href="#auth-bypass" class="px-3 py-1.5 text-xs font-mono rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700">Auth Bypass</a>
+            <a href="#union-search" class="px-3 py-1.5 text-xs font-mono rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700">UNION Exfiltration</a>
+            <a href="#blind-check" class="px-3 py-1.5 text-xs font-mono rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700">Blind Inference</a>
         </div>
     </div>
 
@@ -220,6 +221,76 @@
 
             <div id="sqli-union-fix" class="hidden">
                 <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ union_fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div id="blind-check" class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 03</span>
+                <h2 class="text-base font-bold text-white">Boolean-Based Blind Inference</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-white text-black font-bold">Advanced</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            The directory existence checker only discloses whether an account is present or absent. Inject conditional logic to infer the secret token stored in target records by observing differential boolean responses.
+        </p>
+
+        <form action="/labs/sqli#blind-check" method="GET" class="flex items-center space-x-2">
+            <input type="text" name="blind_user" value="{{ blind_user }}" placeholder="Query username..."
+                class="flex-grow px-3 py-2 text-xs bg-zinc-950 border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+            <button type="submit" class="px-4 py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                Verify User
+            </button>
+            <a href="/labs/sqli#blind-check" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs rounded-md font-mono border border-zinc-700">Clear</a>
+        </form>
+
+        {% if executed_blind_query %}
+        <div class="p-3 bg-zinc-950 rounded-md border border-zinc-800">
+            <span class="text-[11px] text-zinc-500 font-mono block mb-1">Executed Statement:</span>
+            <code class="text-xs font-mono text-zinc-200 break-all">{{ executed_blind_query }}</code>
+        </div>
+        {% endif %}
+
+        {% if blind_error %}
+        <div class="p-3 bg-zinc-900 border border-zinc-600 text-zinc-200 text-xs rounded-md font-mono">
+            [!] Database Exception: {{ blind_error }}
+        </div>
+        {% elif blind_result %}
+        <div class="p-4 rounded-md border font-mono text-xs {% if blind_result.exists %}bg-zinc-900 border-white text-zinc-100{% else %}bg-zinc-950 border-zinc-800 text-zinc-400{% endif %}">
+            {{ blind_result.message }}
+        </div>
+        {% endif %}
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'sqli-blind-hint', 'sqli-blind-vuln', 'sqli-blind-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'sqli-blind-vuln', 'sqli-blind-hint', 'sqli-blind-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'sqli-blind-fix', 'sqli-blind-hint', 'sqli-blind-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="sqli-blind-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>• In blind injection contexts, no row data is directly rendered on screen. Instead, the application displays a binary affirmative or negative state.</p>
+                <p>• Evaluate subqueries with conditional substring checks such as <code class="text-white">substr(...)</code> to ascertain individual character positions.</p>
+            </div>
+
+            <div id="sqli-blind-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ blind_code_snippet }}</code></pre>
+            </div>
+
+            <div id="sqli-blind-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ blind_fix_code }}</code></pre>
             </div>
         </div>
     </div>

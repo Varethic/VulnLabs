@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}XXE Injection Lab | Web Security Laboratory{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">Module: XML Injection</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-white text-black font-bold font-mono">1 Exercise</span>
+            </div>
+            <h1 class="text-xl font-bold text-white mt-1">XML External Entity (XXE) Injection</h1>
+            <p class="text-xs text-zinc-400 mt-1 font-mono">
+                Analyze document type definition (DTD) parsers evaluating external entity URI handlers without restriction.
+            </p>
+        </div>
+        <div class="flex items-center space-x-2 font-mono text-xs">
+            <span class="px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">Parser Configuration</span>
+        </div>
+    </div>
+
+    <div class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 01</span>
+                <h2 class="text-base font-bold text-white">External Document Entity Resolution</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-white text-black font-bold">Advanced</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            The procurement processing endpoint parses customer orders formatted in XML. Examine whether custom DOCTYPE declarations with external system entity references can be defined to exfiltrate confidential server records.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 space-y-4">
+                <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider">XML Payload Editor</h3>
+                <form action="/labs/xxe/parse" method="POST" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-mono text-zinc-400 mb-1">Raw XML Document</label>
+                        <textarea name="xml_content" rows="9" required
+                            class="w-full p-2.5 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white leading-relaxed select-all">{{ xml_input }}</textarea>
+                    </div>
+                    <button type="submit" class="w-full py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                        Parse XML Stream &rarr;
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider mb-3">Parser Output Stream</h3>
+
+                    {% if error %}
+                    <div class="p-3 bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs rounded-md font-mono">
+                        [!] XML Parse Exception: {{ error }}
+                    </div>
+                    {% elif parsed_output %}
+                    <div class="space-y-2">
+                        <span class="text-[11px] text-zinc-500 font-mono block">Extracted Element Values:</span>
+                        <div class="p-3 bg-[#121214] border border-zinc-800 rounded-md font-mono text-xs select-all space-y-1">
+                            {% for tag, val in parsed_output.items() %}
+                            <div>
+                                <span class="text-zinc-500">&lt;{{ tag }}&gt;:</span>
+                                <span class="text-white font-semibold">{{ val }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-xs text-zinc-500 italic font-mono">Submit XML payload above to observe deserialized elements.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'xxe-hint', 'xxe-vuln', 'xxe-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'xxe-vuln', 'xxe-hint', 'xxe-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'xxe-fix', 'xxe-hint', 'xxe-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="xxe-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>• Document Type Definitions (DTDs) support declaring custom entities using the SYSTEM keyword.</p>
+                <p>• Investigate how file URI schemes (such as file:///path) interact with XML parsers when external general entities are referenced within document elements.</p>
+            </div>
+
+            <div id="xxe-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ vuln_code }}</code></pre>
+            </div>
+
+            <div id="xxe-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

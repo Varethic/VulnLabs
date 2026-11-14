@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}API Security Lab | Web Security Laboratory{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">Module: API Security</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-700 text-white font-mono">1 Exercise</span>
+            </div>
+            <h1 class="text-xl font-bold text-white mt-1">Property-Level Information Exposure (BOLA)</h1>
+            <p class="text-xs text-zinc-400 mt-1 font-mono">
+                Analyze REST API serialization routines exposing backend entity schema properties without schema filtering.
+            </p>
+        </div>
+        <div class="flex items-center space-x-2 font-mono text-xs">
+            <span class="px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">Over-Exposure</span>
+        </div>
+    </div>
+
+    <div class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 01</span>
+                <h2 class="text-base font-bold text-white">Privileged Field & Token Over-Exposure</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-zinc-800 text-zinc-300 border border-zinc-700">Introductory</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            The user service REST API serializes internal database models directly into JSON responses without data transfer object (DTO) projection schemas. Query records across user identifiers to identify exposed private properties.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 space-y-4">
+                <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider">REST API Query Client</h3>
+                <form action="/labs/api-security" method="GET" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-mono text-zinc-400 mb-1">User Record Identifier (?user_id=)</label>
+                        <input type="number" name="user_id" value="{{ user_id }}" min="1" max="10" required
+                            class="w-full px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+                    </div>
+                    <button type="submit" class="w-full py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                        Fetch API Record &rarr;
+                    </button>
+                </form>
+                <div class="text-[11px] text-zinc-500 font-mono">
+                    Direct REST Route: <code class="text-zinc-300">/labs/api-security/api/v1/users/{{ user_id }}</code>
+                </div>
+            </div>
+
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider mb-3">API Response Payload (JSON)</h3>
+                    {% if user_data %}
+                    <pre class="p-4 bg-[#121214] border border-zinc-800 rounded-md font-mono text-xs text-zinc-200 select-all overflow-x-auto leading-relaxed"><code>{
+{% for k, v in user_data.items() %}  "{{ k }}": {{ v|tojson }}{% if not loop.last %},{% endif %}
+{% endfor %}}</code></pre>
+
+                    {% if flag %}
+                    <div class="mt-4 p-3 bg-zinc-900 border border-white rounded-md text-white font-mono text-xs select-all">
+                        Flag: <strong>{{ flag }}</strong>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <p class="text-xs text-zinc-500 italic font-mono">No record found matching the specified identifier.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'api-hint', 'api-vuln', 'api-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'api-vuln', 'api-hint', 'api-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'api-fix', 'api-hint', 'api-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="api-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>• Object-level and property-level exposure occurs when internal model fields are returned in raw API outputs rather than filtered through explicit serialization schemas.</p>
+                <p>• Review response structures across different ID indexes (e.g. system accounts, service workers) to discover private credentials or tokens.</p>
+            </div>
+
+            <div id="api-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ vuln_code }}</code></pre>
+            </div>
+
+            <div id="api-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

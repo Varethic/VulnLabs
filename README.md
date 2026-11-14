@@ -4,7 +4,7 @@ A modular, intentionally vulnerable web security training laboratory designed ex
 
 > [!IMPORTANT]
 > **STRICTLY FOR EDUCATIONAL STUDY PURPOSES ONLY.**
-> This software is intended solely for academic learning, vulnerability research, and defense mechanisms study. It contains intentionally flawed logic (SQLi, XSS, IDOR, CMDi, LFI, JWT, SSRF, SSTI, Race Conditions) to demonstrate security impact and remediation patterns. Do not deploy to public untrusted networks or production environments.
+> This software is intended solely for academic learning, vulnerability research, and defense mechanisms study. It contains intentionally flawed logic (SQLi, XSS, IDOR, CMDi, LFI, JWT, SSRF, SSTI, Race Conditions, XXE, Insecure Deserialization, Mass Assignment, CSRF, Open Redirect, CORS, Unrestricted Upload, Header Spoofing, Weak PRNG, API BOLA, DOM XSS) to demonstrate security impact and remediation patterns. Do not deploy to public untrusted networks or production environments.
 
 ---
 
@@ -17,7 +17,7 @@ A modular, intentionally vulnerable web security training laboratory designed ex
 ├── requirements.txt                # FastAPI, Uvicorn, Jinja2, PyJWT, HTTPX, Playwright
 ├── flag.txt                        # Root filesystem flags (CMDi & LFI)
 ├── labs.db                         # SQLite database (auto-seeded on startup)
-├── test_lab.py                     # Automated verification test suite
+├── test_lab.py                     # Automated 24-challenge verification test suite
 ├── internal_admin/                 # Isolated internal microservice (SSRF pivot target)
 │   ├── Dockerfile
 │   └── main.py                     # Listens on port 9000, returns internal secret flag
@@ -27,9 +27,8 @@ A modular, intentionally vulnerable web security training laboratory designed ex
     ├── database.py                 # SQLite initialization, wallet schema & environment reset
     ├── flags.py                    # Central CTF challenge metadata & flag registry
     ├── docs/                       # Target documents for LFI exploration
-    ├── labs/                       # Modular vulnerability routers
-    │   ├── __init__.py
-    │   ├── sqli.py                 # Auth bypass & UNION exfiltration
+    ├── labs/                       # 20 Modular vulnerability routers
+    │   ├── sqli.py                 # Auth bypass, UNION exfiltration & Blind boolean inference
     │   ├── xss.py                  # Reflected XSS, Stored Guestbook & Playwright Admin Bot
     │   ├── idor.py                 # Broken Object Level Authorization (Invoices)
     │   ├── cmdi.py                 # Network diagnostic OS command injection
@@ -37,14 +36,25 @@ A modular, intentionally vulnerable web security training laboratory designed ex
     │   ├── jwt_lab.py              # JWT signature bypass & 'none' algorithm
     │   ├── ssrf.py                 # URL preview checker & internal pivoting
     │   ├── ssti.py                 # Jinja2 template injection & Python RCE
-    │   └── race.py                 # Concurrency TOCTOU coupon redemption glitch
+    │   ├── race.py                 # Concurrency TOCTOU coupon redemption glitch
+    │   ├── xxe.py                  # XML External Entity injection
+    │   ├── deserialization.py      # Python pickle insecure deserialization
+    │   ├── mass_assignment.py      # Model binding & parameter tampering
+    │   ├── csrf.py                 # Cross-Site Request Forgery state change
+    │   ├── redirect.py             # Open URL redirection
+    │   ├── cors.py                 # CORS arbitrary origin credential reflection
+    │   ├── upload.py               # Unrestricted file upload & script storage
+    │   ├── headers_lab.py          # Reverse proxy header spoofing & IP bypass
+    │   ├── crypto_lab.py           # Weak time-seeded PRNG token prediction
+    │   ├── api_lab.py              # API property exposure & BOLA
+    │   └── dom_lab.py              # DOM-based XSS execution sinks
     ├── static/
     │   ├── css/style.css           # Minimalist Monochrome theme (IBM Plex Mono)
     │   └── js/lab.js               # 3-tab switcher (Hint / Vulnerable Source / How to Fix)
-    └── templates/                  # Dark-mode CTF web interface
+    └── templates/                  # Dark-mode educational web interface (rounded-md)
         ├── base.html               # Shared layout, navbar, live flag submit modal
-        ├── index.html              # Central CTF dashboard & score tracker
-        ├── sqli.html               # SQLi workspace with 3-tab secure code comparison
+        ├── index.html              # Central dashboard & curriculum tracker
+        ├── sqli.html               # SQLi workspace (Auth, UNION, Blind)
         ├── xss.html                # XSS workspace with Playwright Bot trigger
         ├── idor.html               # IDOR workspace with 3-tab secure code comparison
         ├── cmdi.html               # CMDi terminal with 3-tab secure code comparison
@@ -52,7 +62,18 @@ A modular, intentionally vulnerable web security training laboratory designed ex
         ├── jwt.html                # JWT attack workbench
         ├── ssrf.html               # SSRF preview workbench & pivot target
         ├── ssti.html               # SSTI custom badge generator
-        └── race.html               # Race condition wallet balance & exploit helper
+        ├── race.html               # Race condition wallet balance & exploit helper
+        ├── xxe.html                # XXE order parser workbench
+        ├── deserialization.html    # Pickle session loader workbench
+        ├── mass_assignment.html    # Profile mass assignment editor
+        ├── csrf.html               # CSRF account action simulator
+        ├── redirect.html           # Open redirect gateway tester
+        ├── cors.html               # CORS preflight & credential header inspector
+        ├── upload.html             # Unrestricted file repository
+        ├── headers.html            # Upstream proxy header evaluator
+        ├── crypto.html             # Weak PRNG token prediction workbench
+        ├── api.html                # REST API property exposure viewer
+        └── dom.html                # DOM XSS client execution sink
 ```
 
 ---
@@ -95,19 +116,20 @@ A modular, intentionally vulnerable web security training laboratory designed ex
 
 ### Option 3: Automated Verification Suite
 
-Run automated checks across all 12 vulnerability paths and flag verification:
+Run automated checks across all 24 vulnerability paths and flag verification:
 ```bash
 python test_lab.py
 ```
 
 ---
 
-## 🎯 Challenge Matrix & Flag Registry
+## 🎯 Challenge Matrix & Flag Registry (24 Exercises)
 
 | ID | Category | Title | Difficulty | Target Route | Flag |
 |---|---|---|---|---|---|
 | `sqli-auth` | SQLi | Login Bypass | Introductory | `POST /labs/sqli/login` | `FLAG{sqli_auth_bypass_login_pwned_8192}` |
 | `sqli-union` | SQLi | UNION Exfiltration | Intermediate | `GET /labs/sqli?q=` | `FLAG{sqli_union_db_extraction_7719}` |
+| `sqli-blind` | SQLi | Boolean Blind Inference | Advanced | `GET /labs/sqli#blind-check` | `FLAG{blind_sqli_boolean_extraction_9102}` |
 | `xss-reflected` | XSS | Reflected Injection | Introductory | `GET /labs/xss?q=` | `FLAG{r3fl3ct3d_xss_c00k13_st0l3n_4421}` |
 | `xss-stored` | XSS | Stored Guestbook | Intermediate | `POST /labs/xss/guestbook` | `FLAG{st0r3d_xss_p3rs1st3nt_p4yl04d_5532}` |
 | `xss-bot` | XSS | Playwright Admin Bot | Advanced | `POST /labs/xss/report` | `FLAG{xss_stole_admin_cookie}` |
@@ -118,37 +140,14 @@ python test_lab.py
 | `ssrf` | SSRF | Internal Network Pivoting | Advanced | `POST /labs/ssrf/check-url` | `FLAG{ssrf_internal_pivot_pwned_9941}` |
 | `ssti` | SSTI | Jinja2 Template Injection RCE | Advanced | `POST /labs/ssti/render` | `FLAG{ssti_jinja2_template_rce_8812}` |
 | `race` | Concurrency | TOCTOU Coupon Redemption | Advanced | `POST /labs/race/redeem` | `FLAG{race_condition_toctou_balance_glitch_4011}` |
-
----
-
-## 🛠️ Exploit Walkthroughs & Remediation Guide
-
-### 1. JWT Attacks (`/labs/jwt`)
-- **Vulnerability:** Server calls `jwt.decode(token, options={"verify_signature": False})`.
-- **Exploitation:**
-  1. Base64url-decode payload `{"sub": "guest", "role": "user"}`.
-  2. Change `"role": "admin"`, re-encode to Base64url.
-  3. Submit forged token to `/labs/jwt/admin-vault` to capture flag.
-- **Remediation:** Enforce cryptographic signature verification: `jwt.decode(token, key=SECRET, algorithms=["HS256"], options={"verify_signature": True})`.
-
-### 2. SSRF & Internal Pivoting (`/labs/ssrf`)
-- **Vulnerability:** Unconstrained server-side HTTP GET requests without IP/hostname allowlisting.
-- **Exploitation:** Target the isolated microservice on the Docker bridge: `http://internal-admin:9000/secret-flag`.
-- **Remediation:** Validate URLs using `socket.gethostbyname()`, block private/loopback RFC1918 ranges with `ipaddress.is_private`, and disable redirects.
-
-### 3. Server-Side Template Injection (`/labs/ssti`)
-- **Vulnerability:** `jinja2.Environment().from_string(f"...{user_input}...").render()`.
-- **Exploitation:**
-  - Expression test: `{{ 7 * 7 }}` -> evaluates to `49`.
-  - Context leak: `{{ SYSTEM_FLAG }}` -> leaks flag.
-  - Python RCE: `{{ self.__init__.__globals__.__builtins__.__import__('os').popen('cat flag.txt').read() }}`.
-- **Remediation:** Never format user input into template strings. Pass input as context variables (`env.from_string("...{{ name }}...").render(name=name)`) with `autoescape=True`.
-
-### 4. Race Condition / TOCTOU (`/labs/race`)
-- **Vulnerability:** 200ms `asyncio.sleep(0.2)` window between checking `coupon_used == 0` and updating balance without database row locks.
-- **Exploitation:** Blast 6-8 concurrent asynchronous POST requests with coupon code `FREE10` to push balance over $50.00, then purchase the elite flag.
-- **Remediation:** Use atomic conditional SQL updates: `UPDATE wallets SET balance = balance + 10.0, coupon_used = 1 WHERE user_id = 1 AND coupon_used = 0;` and check `cursor.rowcount`.
-
-### 5. Playwright Active Admin Bot (`/labs/xss`)
-- **Workflow:** When "Report Page to Admin" is clicked, headless Chromium visits the guestbook carrying a secret non-HttpOnly cookie (`admin_session=FLAG{xss_stole_admin_cookie}`).
-- **Remediation:** Remove `| safe` filters to allow Jinja2 contextual HTML entity escaping, sanitize rich inputs with `nh3`, and mark cookies `HttpOnly=True; Secure; SameSite=Strict`.
+| `xxe` | XML Injection | XML External Entity Injection | Advanced | `POST /labs/xxe/parse` | `FLAG{xxe_external_entity_disclosure_7261}` |
+| `deserialization` | Deserialization | Insecure Object Unpickling | Advanced | `POST /labs/deserialization/load` | `FLAG{insecure_pickle_deserialization_rce_5541}` |
+| `mass-assignment` | Parameter Binding | Privilege Escalation | Intermediate | `POST /labs/mass-assignment/profile` | `FLAG{mass_assignment_privilege_escalation_1289}` |
+| `csrf` | Session Integrity | Cross-Site Request Forgery | Intermediate | `POST /labs/csrf/change-email` | `FLAG{csrf_state_changing_action_pwned_4431}` |
+| `open-redirect` | Input Validation | Arbitrary Target Forwarding | Introductory | `GET /labs/redirect?url=` | `FLAG{open_redirect_phishing_vector_6021}` |
+| `cors` | Origin Policy | Insecure Origin Trust | Intermediate | `GET /labs/cors/api/account-keys` | `FLAG{cors_arbitrary_origin_credential_leak_3391}` |
+| `upload` | File Handling | Unrestricted Extension Verification | Intermediate | `POST /labs/upload` | `FLAG{unrestricted_file_upload_stored_xss_8820}` |
+| `headers-spoof` | Network Boundaries | Trust Boundary Bypass | Introductory | `GET /labs/headers/admin-panel` | `FLAG{header_spoofing_client_ip_bypass_4102}` |
+| `crypto-weak` | Cryptography | Predictable Token Generation | Intermediate | `POST /labs/crypto/verify-token` | `FLAG{weak_prng_predictable_token_7734}` |
+| `bola-api` | API Security | Property-Level Exposure | Introductory | `GET /labs/api-security/api/v1/users/` | `FLAG{bola_api_sensitive_field_exposure_5519}` |
+| `dom-xss` | Client-Side Injection | Client Execution Sink | Intermediate | `GET /labs/dom-xss?nickname=` | `FLAG{dom_xss_execution_sink_untrusted_source_9918}` |

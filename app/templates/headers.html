@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Header Spoofing Lab | Web Security Laboratory{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">Module: Network Boundaries</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-700 text-white font-mono">1 Exercise</span>
+            </div>
+            <h1 class="text-xl font-bold text-white mt-1">HTTP Header Spoofing & IP Trust Bypass</h1>
+            <p class="text-xs text-zinc-400 mt-1 font-mono">
+                Analyze access control logic that unconditionally trusts client-controlled proxy headers to establish IP provenance.
+            </p>
+        </div>
+        <div class="flex items-center space-x-2 font-mono text-xs">
+            <span class="px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">Proxy Header Trust</span>
+        </div>
+    </div>
+
+    <div class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 01</span>
+                <h2 class="text-base font-bold text-white">X-Forwarded-For Trust Boundary Bypass</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-zinc-800 text-zinc-300 border border-zinc-700">Introductory</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            The internal administrative diagnostic panel at <code class="text-white bg-zinc-800 px-1 py-0.5 rounded-md">/labs/headers/admin-panel</code> restricts access to loopback origins. Test whether upstream reverse proxy headers (such as <code class="text-white bg-zinc-800 px-1 py-0.5 rounded-md">X-Forwarded-For</code>) can be manipulated to spoof loopback provenance.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 space-y-4">
+                <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider">Proxy Header Simulator</h3>
+                <form action="/labs/headers" method="GET" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-mono text-zinc-400 mb-1">Simulated X-Forwarded-For IP</label>
+                        <input type="text" name="simulated_ip" value="{{ eval_ip }}" placeholder="e.g. 192.168.1.100 or 127.0.0.1" required
+                            class="w-full px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+                    </div>
+                    <button type="submit" class="w-full py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                        Evaluate Provenance &rarr;
+                    </button>
+                </form>
+                <div class="text-[11px] text-zinc-500 font-mono">
+                    API Endpoint: <code class="text-zinc-300">/labs/headers/admin-panel</code>
+                </div>
+            </div>
+
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider mb-3">Authorization Decision</h3>
+                    <div class="p-4 bg-[#121214] border border-zinc-800 rounded-md font-mono text-xs space-y-2">
+                        <div class="flex justify-between border-b border-zinc-800 pb-2">
+                            <span class="text-zinc-500">Evaluated Client IP:</span>
+                            <span class="text-white font-bold">{{ eval_ip }}</span>
+                        </div>
+                        <div class="flex justify-between border-b border-zinc-800 pb-2">
+                            <span class="text-zinc-500">Physical Socket IP:</span>
+                            <span class="text-zinc-400">{{ actual_ip }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-zinc-500">Access Decision:</span>
+                            <span class="font-bold {% if is_authorized %}text-white bg-zinc-800 px-1.5 py-0.5 rounded-md border border-white{% else %}text-zinc-400{% endif %}">
+                                {% if is_authorized %}ADMINISTRATIVE ACCESS GRANTED{% else %}REMOTE ACCESS FORBIDDEN{% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    {% if flag %}
+                    <div class="mt-4 p-3 bg-zinc-900 border border-white rounded-md text-white font-mono text-xs select-all">
+                        Flag: <strong>{{ flag }}</strong>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'head-hint', 'head-vuln', 'head-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'head-vuln', 'head-hint', 'head-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'head-fix', 'head-hint', 'head-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="head-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>• HTTP headers are untrusted metadata transmitted directly by the HTTP client unless explicitly sanitized or rewritten by an edge reverse proxy.</p>
+                <p>• Examine standard de-facto forwarding headers such as <code class="text-white">X-Forwarded-For</code>, <code class="text-white">X-Real-IP</code>, and <code class="text-white">Client-IP</code>.</p>
+            </div>
+
+            <div id="head-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ vuln_code }}</code></pre>
+            </div>
+
+            <div id="head-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -31,7 +31,7 @@
             }
         }
     </script>
-    <link rel="stylesheet" href="/static/css/style.css?v=5">
+    <link rel="stylesheet" href="/static/css/style.css?v=6">
     <script src="/static/js/lab.js"></script>
     {% block extra_head %}{% endblock %}
 </head>
@@ -48,42 +48,59 @@
                     </span>
                     <div>
                         <span class="text-sm font-bold tracking-tight text-white group-hover:text-zinc-300 transition-colors">CYBER<span class="text-zinc-400">LAB</span></span>
-                        <span class="text-[9px] ml-1 px-1 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono">Training Portal</span>
+                        <span class="text-[9px] ml-1 px-1 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono">24 Modules</span>
                     </div>
                 </a>
             </div>
 
-            <nav class="hidden lg:flex items-center space-x-1 font-medium text-[11px]">
+            <nav class="hidden md:flex items-center space-x-1 font-medium text-[11px]">
                 <a href="/" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'dashboard' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
                     Dashboard
                 </a>
-                <a href="/labs/sqli" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'sqli' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
+                <a href="/labs/sqli" class="px-2 py-1.5 rounded-md transition-colors {% if active_tab == 'sqli' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
                     SQLi
                 </a>
-                <a href="/labs/xss" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'xss' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
+                <a href="/labs/xss" class="px-2 py-1.5 rounded-md transition-colors {% if active_tab == 'xss' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
                     XSS
                 </a>
-                <a href="/labs/idor" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'idor' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
+                <a href="/labs/idor" class="px-2 py-1.5 rounded-md transition-colors {% if active_tab == 'idor' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
                     IDOR
                 </a>
-                <a href="/labs/cmdi" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'cmdi' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
+                <a href="/labs/cmdi" class="px-2 py-1.5 rounded-md transition-colors {% if active_tab == 'cmdi' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
                     CMDi
                 </a>
-                <a href="/labs/lfi" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'lfi' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
+                <a href="/labs/lfi" class="px-2 py-1.5 rounded-md transition-colors {% if active_tab == 'lfi' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
                     LFI
                 </a>
-                <a href="/labs/jwt" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'jwt' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
+                <a href="/labs/jwt" class="px-2 py-1.5 rounded-md transition-colors {% if active_tab == 'jwt' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
                     JWT
                 </a>
-                <a href="/labs/ssrf" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'ssrf' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
+                <a href="/labs/ssrf" class="px-2 py-1.5 rounded-md transition-colors {% if active_tab == 'ssrf' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
                     SSRF
                 </a>
-                <a href="/labs/ssti" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'ssti' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
-                    SSTI
-                </a>
-                <a href="/labs/race" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'race' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
-                    Race
-                </a>
+
+                <div class="relative group">
+                    <button type="button" class="px-2.5 py-1.5 rounded-md transition-colors text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 flex items-center space-x-1">
+                        <span>All Labs</span>
+                        <svg class="w-3 h-3 text-zinc-400 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    <div class="absolute right-0 mt-1 w-64 bg-[#121214] border border-zinc-800 rounded-md shadow-2xl p-2 hidden group-hover:block z-50 font-mono text-[11px] max-h-96 overflow-y-auto">
+                        <div class="text-[10px] text-zinc-500 uppercase font-semibold px-2 py-1">Advanced Modules</div>
+                        <a href="/labs/ssti" class="block px-2 py-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-900">SSTI: Template Injection</a>
+                        <a href="/labs/race" class="block px-2 py-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-900">Race Condition: TOCTOU</a>
+                        <a href="/labs/xxe" class="block px-2 py-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-900">XXE: External Entities</a>
+                        <a href="/labs/deserialization" class="block px-2 py-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-900">Insecure Deserialization</a>
+                        <a href="/labs/mass-assignment" class="block px-2 py-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-900">Mass Assignment</a>
+                        <a href="/labs/csrf" class="block px-2 py-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-900">CSRF: Session Forgery</a>
+                        <a href="/labs/redirect" class="block px-2 py-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-900">Open URL Redirect</a>
+                        <a href="/labs/cors" class="block px-2 py-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-900">CORS Misconfiguration</a>
+                        <a href="/labs/upload" class="block px-2 py-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-900">Unrestricted File Upload</a>
+                        <a href="/labs/headers" class="block px-2 py-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-900">Header / IP Spoofing</a>
+                        <a href="/labs/crypto" class="block px-2 py-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-900">Weak PRNG Tokens</a>
+                        <a href="/labs/api-security" class="block px-2 py-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-900">API BOLA / Field Exposure</a>
+                        <a href="/labs/dom-xss" class="block px-2 py-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-900">DOM-Based XSS</a>
+                    </div>
+                </div>
             </nav>
 
             <div class="flex items-center space-x-2">
@@ -130,7 +147,7 @@
                 <span class="font-semibold text-zinc-400">Cybersecurity Educational Laboratory</span>
             </div>
             <div class="flex items-center space-x-3 text-zinc-400 text-[11px]">
-                <span>FastAPI Security Workbench</span>
+                <span>FastAPI Security Workbench • 24 Exercises</span>
             </div>
         </div>
     </footer>

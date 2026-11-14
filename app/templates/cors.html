@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}CORS Misconfiguration Lab | Web Security Laboratory{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="border-b border-zinc-800 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">Module: Origin Policy</span>
+                <span class="text-[11px] px-2 py-0.5 rounded-md bg-zinc-700 text-white font-mono">1 Exercise</span>
+            </div>
+            <h1 class="text-xl font-bold text-white mt-1">Cross-Origin Resource Sharing (CORS) Misconfiguration</h1>
+            <p class="text-xs text-zinc-400 mt-1 font-mono">
+                Analyze permissive cross-origin access control policies that reflect arbitrary origins with credential support.
+            </p>
+        </div>
+        <div class="flex items-center space-x-2 font-mono text-xs">
+            <span class="px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold">Credential Exposure</span>
+        </div>
+    </div>
+
+    <div class="rounded-md bg-[#121214] border border-zinc-800 p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div>
+                <span class="text-xs font-mono text-zinc-400 uppercase font-semibold">Exercise 01</span>
+                <h2 class="text-base font-bold text-white">Arbitrary Origin Reflection with Credential Trust</h2>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-mono bg-zinc-700 text-zinc-200 border border-zinc-600">Intermediate</span>
+        </div>
+
+        <p class="text-xs text-zinc-400 leading-relaxed font-mono">
+            The private API endpoint at <code class="text-white bg-zinc-800 px-1 py-0.5 rounded-md">/labs/cors/api/account-keys</code> returns confidential executive session tokens. Examine the response headers returned when an untrusted third-party Origin header is supplied.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 space-y-4">
+                <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider">CORS Header Tester</h3>
+                <form action="/labs/cors" method="GET" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-mono text-zinc-400 mb-1">Simulated Origin Request Header</label>
+                        <input type="text" name="simulated_origin" value="{{ simulated_origin }}" placeholder="https://attacker.local" required
+                            class="w-full px-3 py-2 text-xs bg-[#121214] border border-zinc-700 rounded-md text-white font-mono focus:outline-none focus:border-white">
+                    </div>
+                    <button type="submit" class="w-full py-2 bg-white hover:bg-zinc-200 text-black font-semibold text-xs rounded-md font-mono transition-colors border border-white">
+                        Send Preflight & Request &rarr;
+                    </button>
+                </form>
+                <div class="text-[11px] text-zinc-500 font-mono">
+                    API Endpoint: <code class="text-zinc-300">/labs/cors/api/account-keys</code>
+                </div>
+            </div>
+
+            <div class="bg-zinc-950 p-5 rounded-md border border-zinc-800 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xs font-mono text-zinc-300 uppercase tracking-wider mb-3">Response Header Headers</h3>
+                    <div class="p-4 bg-[#121214] border border-zinc-800 rounded-md font-mono text-xs space-y-2">
+                        {% for h, v in headers_returned.items() %}
+                        <div class="flex justify-between border-b border-zinc-800 pb-1">
+                            <span class="text-zinc-500">{{ h }}:</span>
+                            <span class="text-white font-bold select-all">{{ v }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if flag %}
+                    <div class="mt-4 p-3 bg-zinc-900 border border-white rounded-md text-white font-mono text-xs select-all">
+                        Flag: <strong>{{ flag }}</strong>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-zinc-800/80">
+            <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
+                <button type="button" onclick="switchLabTab(this, 'cors-hint', 'cors-vuln', 'cors-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
+                    Hint
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'cors-vuln', 'cors-hint', 'cors-fix')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    Vulnerable Source
+                </button>
+                <button type="button" onclick="switchLabTab(this, 'cors-fix', 'cors-hint', 'cors-vuln')"
+                    class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
+                    How to Fix (Secure Patch)
+                </button>
+            </div>
+
+            <div id="cors-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+                <p>• The W3C CORS specification prohibits combining a wildcard <code class="text-white">*</code> origin with <code class="text-white">Access-Control-Allow-Credentials: true</code>.</p>
+                <p>• Observe whether the application circumvents this browser restriction by dynamically reflecting arbitrary client Origin headers into the response.</p>
+            </div>
+
+            <div id="cors-vuln" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ vuln_code }}</code></pre>
+            </div>
+
+            <div id="cors-fix" class="hidden">
+                <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-200 border border-zinc-600 overflow-x-auto"><code>{{ fix_code }}</code></pre>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
