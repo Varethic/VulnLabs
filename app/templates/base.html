@@ -6,7 +6,15 @@
     <title>{% block title %}Web Security Laboratory{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        (function() {
+            var m = document.cookie.match(/(?:^|;\s*)lab_lang=([^;]*)/);
+            if (m && m[1] === 'th') {
+                document.documentElement.classList.add('th-mode');
+            }
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -14,8 +22,8 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['"IBM Plex Mono"', 'monospace'],
-                        mono: ['"IBM Plex Mono"', 'monospace'],
+                        sans: ['"IBM Plex Mono"', '"IBM Plex Sans Thai"', 'monospace'],
+                        mono: ['"IBM Plex Mono"', '"IBM Plex Sans Thai"', 'monospace'],
                     },
                     borderRadius: {
                         DEFAULT: '0.375rem',
@@ -31,7 +39,7 @@
             }
         }
     </script>
-    <link rel="stylesheet" href="/static/css/style.css?v=6">
+    <link rel="stylesheet" href="/static/css/style.css?v=7">
     <script src="/static/js/lab.js"></script>
     {% block extra_head %}{% endblock %}
 </head>
@@ -48,14 +56,18 @@
                     </span>
                     <div>
                         <span class="text-sm font-bold tracking-tight text-white group-hover:text-zinc-300 transition-colors">CYBER<span class="text-zinc-400">LAB</span></span>
-                        <span class="text-[9px] ml-1 px-1 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono">28 Exercises</span>
+                        <span class="text-[9px] ml-1 px-1 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono">
+                            <span class="lang-en">28 Exercises</span>
+                            <span class="lang-th">28 แบบฝึกหัด</span>
+                        </span>
                     </div>
                 </a>
             </div>
 
             <nav class="hidden md:flex items-center space-x-1 font-medium text-[11px]">
                 <a href="/" class="px-2.5 py-1.5 rounded-md transition-colors {% if active_tab == 'dashboard' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
-                    Dashboard
+                    <span class="lang-en">Dashboard</span>
+                    <span class="lang-th">แดชบอร์ด</span>
                 </a>
                 <a href="/labs/sqli" class="px-2 py-1.5 rounded-md transition-colors {% if active_tab == 'sqli' %}bg-zinc-800 text-white border border-zinc-600{% else %}text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent{% endif %}">
                     SQLi
@@ -81,11 +93,15 @@
 
                 <div class="relative group">
                     <button type="button" class="px-2.5 py-1.5 rounded-md transition-colors text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 flex items-center space-x-1">
-                        <span>All Labs</span>
+                        <span class="lang-en">All Labs</span>
+                        <span class="lang-th">แล็บทั้งหมด</span>
                         <svg class="w-3 h-3 text-zinc-400 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                     </button>
                     <div class="absolute right-0 mt-1 w-64 bg-[#121214] border border-zinc-800 rounded-md shadow-2xl p-2 hidden group-hover:block z-50 font-mono text-[11px] max-h-96 overflow-y-auto">
-                        <div class="text-[10px] text-zinc-500 uppercase font-semibold px-2 py-1">Advanced Modules</div>
+                        <div class="text-[10px] text-zinc-500 uppercase font-semibold px-2 py-1">
+                            <span class="lang-en">Advanced Modules</span>
+                            <span class="lang-th">โมดูลขั้นสูง</span>
+                        </div>
                         <a href="/labs/ssti" class="block px-2 py-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-900">SSTI: Template Injection</a>
                         <a href="/labs/race" class="block px-2 py-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-900">Race Condition: TOCTOU</a>
                         <a href="/labs/xxe" class="block px-2 py-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-900">XXE: External Entities</a>
@@ -105,12 +121,24 @@
             </nav>
 
             <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-0.5 p-0.5 rounded-md bg-zinc-900 border border-zinc-800">
+                    <button type="button" id="btn-lang-en" onclick="setLanguage('en')"
+                        class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-white text-black border border-white transition-colors">
+                        EN
+                    </button>
+                    <button type="button" id="btn-lang-th" onclick="setLanguage('th')"
+                        class="px-2 py-0.5 rounded-md text-[10px] font-mono text-zinc-400 hover:text-white border border-transparent transition-colors">
+                        TH
+                    </button>
+                </div>
+
                 <form action="/submit-flag" method="POST" class="flex items-center space-x-1.5">
                     <input type="text" name="flag" placeholder="FLAG{...}" required
                         class="w-32 sm:w-44 px-2 py-1.5 text-xs bg-zinc-950 border border-zinc-700 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:border-white font-mono transition-all">
                     <button type="submit"
                         class="px-2.5 py-1.5 text-xs font-semibold bg-white hover:bg-zinc-200 text-black rounded-md transition-colors flex items-center space-x-1 border border-white">
-                        <span class="hidden sm:inline">Verify</span>
+                        <span class="hidden sm:inline lang-en">Verify</span>
+                        <span class="hidden sm:inline lang-th">ตรวจสอบ</span>
                     </button>
                 </form>
             </div>
@@ -145,10 +173,16 @@
     <footer class="border-t border-zinc-800 bg-[#0f0f11] py-6 text-center text-xs text-zinc-500 font-mono">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
             <div>
-                <span class="font-semibold text-zinc-400">Cybersecurity Educational Laboratory</span>
+                <span class="font-semibold text-zinc-400">
+                    <span class="lang-en">Cybersecurity Educational Laboratory</span>
+                    <span class="lang-th">ระบบทดสอบความปลอดภัยเว็บแอปพลิเคชันเชิงปฏิบัติการ</span>
+                </span>
             </div>
             <div class="flex items-center space-x-3 text-zinc-400 text-[11px]">
-                <span>FastAPI Security Workbench • 24 Exercises</span>
+                <span>
+                    <span class="lang-en">FastAPI Security Workbench • 28 Exercises</span>
+                    <span class="lang-th">FastAPI Security Workbench • 28 แบบฝึกหัด</span>
+                </span>
             </div>
         </div>
     </footer>

@@ -75,22 +75,31 @@
             <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
                 <button type="button" onclick="switchLabTab(this, 'cmdi-hint', 'cmdi-vuln', 'cmdi-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
-                    Hint
+                    <span class="lang-en">Hint</span>
+                    <span class="lang-th">คำใบ้</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'cmdi-vuln', 'cmdi-hint', 'cmdi-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    Vulnerable Source
+                    <span class="lang-en">Vulnerable Source</span>
+                    <span class="lang-th">ซอร์สโค้ดที่มีช่องโหว่</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'cmdi-fix', 'cmdi-hint', 'cmdi-vuln')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    How to Fix (Secure Patch)
+                    <span class="lang-en">How to Fix (Secure Patch)</span>
+                    <span class="lang-th">แนวทางแก้ไข (Secure Patch)</span>
                 </button>
             </div>
 
             <div id="cmdi-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+            <div class="lang-en space-y-2">
                 <p>• Review command chaining syntax and separator metacharacters supported by operating system command interpreters.</p>
                 <p>• Consider how command pipelines, conditional operators, and line termination tokens are handled when input is executed in a subshell context.</p>
             </div>
+            <div class="lang-th space-y-2">
+                <p>&bull; ทบทวนไวยากรณ์การต่อคำสั่ง (Command Chaining) และอักขระพิเศษ (Separator Metacharacters) ที่ระบบปฏิบัติการรองรับ</p>
+                <p>&bull; พิจารณาว่าคำสั่งไพพ์ไลน์ (Pipes), ตัวดำเนินการแบบมีเงื่อนไข และอักขระสิ้นสุดบรรทัด ทำงานอย่างไรเมื่อข้อมูลถูกส่งไปประมวลผลบนเชลล์</p>
+            </div>
+        </div>
 
             <div id="cmdi-vuln" class="hidden">
                 <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ cmdi_code_snippet }}</code></pre>

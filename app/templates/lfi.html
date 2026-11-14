@@ -103,22 +103,31 @@
             <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
                 <button type="button" onclick="switchLabTab(this, 'lfi-hint', 'lfi-vuln', 'lfi-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
-                    Hint
+                    <span class="lang-en">Hint</span>
+                    <span class="lang-th">คำใบ้</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'lfi-vuln', 'lfi-hint', 'lfi-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    Vulnerable Source
+                    <span class="lang-en">Vulnerable Source</span>
+                    <span class="lang-th">ซอร์สโค้ดที่มีช่องโหว่</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'lfi-fix', 'lfi-hint', 'lfi-vuln')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    How to Fix (Secure Patch)
+                    <span class="lang-en">How to Fix (Secure Patch)</span>
+                    <span class="lang-th">แนวทางแก้ไข (Secure Patch)</span>
                 </button>
             </div>
 
             <div id="lfi-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+            <div class="lang-en space-y-2">
                 <p>• Examine relative directory traversal operators across hierarchical file systems.</p>
                 <p>• Evaluate absolute file paths and canonical path resolution when input parameters are directly concatenated into filesystem read routines.</p>
             </div>
+            <div class="lang-th space-y-2">
+                <p>&bull; ศึกษาการใช้ตัวดำเนินการ Relative Path (../) ในการย้อนระดับโฟลเดอร์ของระบบไฟล์</p>
+                <p>&bull; ทดสอบการอ้างอิงเส้นทางเพื่อเข้าถึงไฟล์ระบบหรือไฟล์คอนฟิกูเรชันของเซิร์ฟเวอร์</p>
+            </div>
+        </div>
 
             <div id="lfi-vuln" class="hidden">
                 <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ lfi_code_snippet }}</code></pre>
@@ -197,22 +206,31 @@
             <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
                 <button type="button" onclick="switchLabTab(this, 'nest-hint', 'nest-vuln', 'nest-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
-                    Hint
+                    <span class="lang-en">Hint</span>
+                    <span class="lang-th">คำใบ้</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'nest-vuln', 'nest-hint', 'nest-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    Vulnerable Source
+                    <span class="lang-en">Vulnerable Source</span>
+                    <span class="lang-th">ซอร์สโค้ดที่มีช่องโหว่</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'nest-fix', 'nest-hint', 'nest-vuln')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    How to Fix (Secure Patch)
+                    <span class="lang-en">How to Fix (Secure Patch)</span>
+                    <span class="lang-th">แนวทางแก้ไข (Secure Patch)</span>
                 </button>
             </div>
 
             <div id="nest-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+            <div class="lang-en space-y-2">
                 <p>• Single-pass string replacement functions only remove matching substrings once without recursing.</p>
                 <p>• Consider what happens when the inner substring of a nested sequence like <code class="text-white">....//</code> is excised by the sanitizer.</p>
             </div>
+            <div class="lang-th space-y-2">
+                <p>&bull; ฟังก์ชันค้นหาและแทนที่แบบรอบเดียว (Single-pass replacement) จะลบคำที่ตรงกันเพียงครั้งเดียวโดยไม่ทำซ้ำ</p>
+                <p>&bull; พิจารณาว่าเมื่อลำดับ ../ ถูกลบออก ตัวอักษรที่อยู่ล้อมรอบ (เช่น ....//) จะยุบตัวกลับมาเป็นลำดับคำสั่งที่สมบูรณ์ได้อย่างไร</p>
+            </div>
+        </div>
 
             <div id="nest-vuln" class="hidden">
                 <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ nested_code_snippet }}</code></pre>

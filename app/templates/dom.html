@@ -71,22 +71,31 @@
             <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
                 <button type="button" onclick="switchLabTab(this, 'dom-hint', 'dom-vuln', 'dom-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
-                    Hint
+                    <span class="lang-en">Hint</span>
+                    <span class="lang-th">คำใบ้</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'dom-vuln', 'dom-hint', 'dom-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    Vulnerable Source
+                    <span class="lang-en">Vulnerable Source</span>
+                    <span class="lang-th">ซอร์สโค้ดที่มีช่องโหว่</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'dom-fix', 'dom-hint', 'dom-vuln')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    How to Fix (Secure Patch)
+                    <span class="lang-en">How to Fix (Secure Patch)</span>
+                    <span class="lang-th">แนวทางแก้ไข (Secure Patch)</span>
                 </button>
             </div>
 
             <div id="dom-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+            <div class="lang-en space-y-2">
                 <p>• Differentiate between server-side reflection and purely client-side DOM sources like <code class="text-white">location.hash</code> or <code class="text-white">location.search</code>.</p>
                 <p>• Observe how assigning unsanitized strings directly to <code class="text-white">innerHTML</code> forces the browser engine to parse HTML tags and event handlers.</p>
             </div>
+            <div class="lang-th space-y-2">
+                <p>&bull; แยกแยะความแตกต่างระหว่างการสะท้อนข้อมูลฝั่งเซิร์ฟเวอร์กับการอ่านข้อมูลฝั่งไคลเอนต์บน DOM (เช่น location.search, location.hash)</p>
+                <p>&bull; ตรวจสอบฟังก์ชัน Sink ที่อันตรายบนเบราว์เซอร์ เช่น innerHTML หรือ document.write ที่รับข้อมูลโดยไม่มีการแปลงอักขระ</p>
+            </div>
+        </div>
 
             <div id="dom-vuln" class="hidden">
                 <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ vuln_code }}</code></pre>

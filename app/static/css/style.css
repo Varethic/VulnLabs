@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap');
 
 :root {
     --bg-dark: #0a0a0a;
@@ -9,13 +9,13 @@
 }
 
 body {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'IBM Plex Mono', 'IBM Plex Sans Thai', monospace;
     background-color: var(--bg-dark);
     color: #e5e5e5;
 }
 
 pre, code, .font-mono, input, button, textarea, select {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'IBM Plex Mono', 'IBM Plex Sans Thai', monospace;
 }
 
 .rounded, .rounded-sm, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl, .rounded-full {
@@ -42,4 +42,37 @@ pre, code, .font-mono, input, button, textarea, select {
 }
 ::-webkit-scrollbar-thumb:hover {
     background: #404040;
+}
+
+.lang-th {
+    display: none !important;
+}
+
+.lang-en {
+    display: inline;
+}
+
+div.lang-en, p.lang-en, blockquote.lang-en {
+    display: block;
+}
+
+.flex.lang-en {
+    display: flex;
+}
+
+html.th-mode .lang-en, body.th-mode .lang-en {
+    display: none !important;
+}
+
+html.th-mode .lang-th, body.th-mode .lang-th {
+    display: inline !important;
+}
+
+html.th-mode div.lang-th, html.th-mode p.lang-th, html.th-mode blockquote.lang-th,
+body.th-mode div.lang-th, body.th-mode p.lang-th, body.th-mode blockquote.lang-th {
+    display: block !important;
+}
+
+html.th-mode .flex.lang-th, body.th-mode .flex.lang-th {
+    display: flex !important;
 }

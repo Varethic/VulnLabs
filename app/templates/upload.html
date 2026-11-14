@@ -87,22 +87,31 @@
             <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
                 <button type="button" onclick="switchLabTab(this, 'up-hint', 'up-vuln', 'up-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
-                    Hint
+                    <span class="lang-en">Hint</span>
+                    <span class="lang-th">คำใบ้</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'up-vuln', 'up-hint', 'up-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    Vulnerable Source
+                    <span class="lang-en">Vulnerable Source</span>
+                    <span class="lang-th">ซอร์สโค้ดที่มีช่องโหว่</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'up-fix', 'up-hint', 'up-vuln')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    How to Fix (Secure Patch)
+                    <span class="lang-en">How to Fix (Secure Patch)</span>
+                    <span class="lang-th">แนวทางแก้ไข (Secure Patch)</span>
                 </button>
             </div>
 
             <div id="up-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+            <div class="lang-en space-y-2">
                 <p>• Review the distinction between client-supplied Content-Type headers and the actual filename extension or file magic bytes.</p>
                 <p>• Evaluate file formats (such as HTML or SVG) that web browsers render as active execution contexts when directly accessed via URL.</p>
             </div>
+            <div class="lang-th space-y-2">
+                <p>&bull; ทำความเข้าใจความแตกต่างระหว่าง Header Content-Type ที่ไคลเอนต์ส่งมา กับนามสกุลไฟล์ที่แท้จริงบนเซิร์ฟเวอร์</p>
+                <p>&bull; ทดสอบการอัปโหลดไฟล์ที่มีนามสกุลแบบผสม หรือไฟล์สคริปต์ที่สามารถทำงานได้บนเบราว์เซอร์เมื่อถูกเรียกดูโดยตรง</p>
+            </div>
+        </div>
 
             <div id="up-vuln" class="hidden">
                 <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ vuln_code }}</code></pre>

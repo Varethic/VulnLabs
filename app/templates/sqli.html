@@ -100,22 +100,31 @@
             <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
                 <button type="button" onclick="switchLabTab(this, 'sqli-auth-hint', 'sqli-auth-vuln', 'sqli-auth-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
-                    Hint
+                    <span class="lang-en">Hint</span>
+                    <span class="lang-th">คำใบ้</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'sqli-auth-vuln', 'sqli-auth-hint', 'sqli-auth-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    Vulnerable Source
+                    <span class="lang-en">Vulnerable Source</span>
+                    <span class="lang-th">ซอร์สโค้ดที่มีช่องโหว่</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'sqli-auth-fix', 'sqli-auth-hint', 'sqli-auth-vuln')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    How to Fix (Secure Patch)
+                    <span class="lang-en">How to Fix (Secure Patch)</span>
+                    <span class="lang-th">แนวทางแก้ไข (Secure Patch)</span>
                 </button>
             </div>
 
             <div id="sqli-auth-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+            <div class="lang-en space-y-2">
                 <p>• Consider how SQL parses string literals and delimiters when building queries through string formatting.</p>
                 <p>• Evaluate boolean expressions in SQL clauses and explore how SQL comment operators affect the parser when truncating subsequent conditions.</p>
             </div>
+            <div class="lang-th space-y-2">
+                <p>&bull; พิจารณาว่า SQL ประมวลผลเครื่องหมายคำพูด (Quotes) และตัวแบ่งข้อความอย่างไร เมื่อสร้างคิวรีผ่านการต่อสตริง</p>
+                <p>&bull; สร้างเงื่อนไขบูลีนแบบ OR ที่เป็นจริงเสมอ และใช้สัญลักษณ์คอมเมนต์ของ SQL เพื่อตัดเงื่อนไขส่วนหลังออก</p>
+            </div>
+        </div>
 
             <div id="sqli-auth-vuln" class="hidden">
                 <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ auth_code_snippet }}</code></pre>
@@ -199,22 +208,31 @@
             <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
                 <button type="button" onclick="switchLabTab(this, 'sqli-union-hint', 'sqli-union-vuln', 'sqli-union-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
-                    Hint
+                    <span class="lang-en">Hint</span>
+                    <span class="lang-th">คำใบ้</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'sqli-union-vuln', 'sqli-union-hint', 'sqli-union-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    Vulnerable Source
+                    <span class="lang-en">Vulnerable Source</span>
+                    <span class="lang-th">ซอร์สโค้ดที่มีช่องโหว่</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'sqli-union-fix', 'sqli-union-hint', 'sqli-union-vuln')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    How to Fix (Secure Patch)
+                    <span class="lang-en">How to Fix (Secure Patch)</span>
+                    <span class="lang-th">แนวทางแก้ไข (Secure Patch)</span>
                 </button>
             </div>
 
             <div id="sqli-union-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+            <div class="lang-en space-y-2">
                 <p>• The UNION operator appends result sets from multiple SELECT statements. Both queries must project an equal number of columns with compatible datatypes.</p>
                 <p>• Determine the column count of the primary query, then map fields from target tables into corresponding positions.</p>
             </div>
+            <div class="lang-th space-y-2">
+                <p>&bull; คำสั่ง UNION รวมผลลัพธ์จากคำสั่ง SELECT หลายชุดเข้าด้วยกัน โดยจำนวนคอลัมน์และประเภทข้อมูลต้องตรงกัน</p>
+                <p>&bull; หาจำนวนคอลัมน์ของคิวรีหลักก่อน แล้วจึงกำหนดฟิลด์จากตารางเป้าหมายให้อยู่ในตำแหน่งคอลัมน์ที่สอดคล้องกัน</p>
+            </div>
+        </div>
 
             <div id="sqli-union-vuln" class="hidden">
                 <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ union_code_snippet }}</code></pre>
@@ -269,22 +287,31 @@
             <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
                 <button type="button" onclick="switchLabTab(this, 'sqli-blind-hint', 'sqli-blind-vuln', 'sqli-blind-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
-                    Hint
+                    <span class="lang-en">Hint</span>
+                    <span class="lang-th">คำใบ้</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'sqli-blind-vuln', 'sqli-blind-hint', 'sqli-blind-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    Vulnerable Source
+                    <span class="lang-en">Vulnerable Source</span>
+                    <span class="lang-th">ซอร์สโค้ดที่มีช่องโหว่</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'sqli-blind-fix', 'sqli-blind-hint', 'sqli-blind-vuln')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    How to Fix (Secure Patch)
+                    <span class="lang-en">How to Fix (Secure Patch)</span>
+                    <span class="lang-th">แนวทางแก้ไข (Secure Patch)</span>
                 </button>
             </div>
 
             <div id="sqli-blind-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+            <div class="lang-en space-y-2">
                 <p>• In blind injection contexts, no row data is directly rendered on screen. Instead, the application displays a binary affirmative or negative state.</p>
                 <p>• Evaluate subqueries with conditional substring checks such as <code class="text-white">substr(...)</code> to ascertain individual character positions.</p>
             </div>
+            <div class="lang-th space-y-2">
+                <p>&bull; ในช่องโหว่แบบ Blind ข้อมูลจะไม่ถูกแสดงผลบนหน้าจอโดยตรง แต่จะสังเกตได้จากผลลัพธ์เชิงตรรกะที่แตกต่างกัน</p>
+                <p>&bull; แทรกเงื่อนไขเพื่อทดสอบความจริงของข้อมูลทีละตัวอักษร โดยสังเกตการตอบกลับว่าพบบัญชีหรือไม่</p>
+            </div>
+        </div>
 
             <div id="sqli-blind-vuln" class="hidden">
                 <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ blind_code_snippet }}</code></pre>
@@ -371,22 +398,31 @@
             <div class="flex items-center space-x-1 border-b border-zinc-800 pb-2 mb-3 text-xs font-mono">
                 <button type="button" onclick="switchLabTab(this, 'sqli-nest-hint', 'sqli-nest-vuln', 'sqli-nest-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-zinc-800 text-white border border-zinc-600 font-semibold transition-colors">
-                    Hint
+                    <span class="lang-en">Hint</span>
+                    <span class="lang-th">คำใบ้</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'sqli-nest-vuln', 'sqli-nest-hint', 'sqli-nest-fix')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    Vulnerable Source
+                    <span class="lang-en">Vulnerable Source</span>
+                    <span class="lang-th">ซอร์สโค้ดที่มีช่องโหว่</span>
                 </button>
                 <button type="button" onclick="switchLabTab(this, 'sqli-nest-fix', 'sqli-nest-hint', 'sqli-nest-vuln')"
                     class="tab-btn px-3 py-1 rounded-md bg-transparent text-zinc-400 hover:text-white border border-transparent transition-colors">
-                    How to Fix (Secure Patch)
+                    <span class="lang-en">How to Fix (Secure Patch)</span>
+                    <span class="lang-th">แนวทางแก้ไข (Secure Patch)</span>
                 </button>
             </div>
 
             <div id="sqli-nest-hint" class="p-4 bg-zinc-950 border border-zinc-800 rounded-md text-xs font-mono text-zinc-400 space-y-2 leading-relaxed">
+            <div class="lang-en space-y-2">
                 <p>• If a sanitizer strips a forbidden word once, inserting the forbidden word inside itself (e.g. <code class="text-white">UNUNIONION</code>) causes the outer fragments to reform the original token upon deletion.</p>
                 <p>• Formulate queries using interleaved keywords to bypass blacklists.</p>
             </div>
+            <div class="lang-th space-y-2">
+                <p>&bull; หากตัวกรองตัดคีย์เวิร์ดที่ต้องห้ามออกเพียงรอบเดียว การแทรกคีย์เวิร์ดซ้อนไว้ในตัวเอง (เช่น UNUNIONION) จะทำให้เหลือคีย์เวิร์ดที่ทำงานได้</p>
+                <p>&bull; สร้างเพย์โหลดที่มีคำสั่งซ้อนทับกัน เพื่อให้ระบบยุบตัวอักษรกลับมาเป็นคำสั่ง SQL ที่สมบูรณ์หลังการกรอง</p>
+            </div>
+        </div>
 
             <div id="sqli-nest-vuln" class="hidden">
                 <pre class="bg-black p-3 rounded-md text-[11px] font-mono text-zinc-300 border border-zinc-800 overflow-x-auto"><code>{{ nested_sql_code_snippet }}</code></pre>

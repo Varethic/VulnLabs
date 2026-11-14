@@ -133,6 +133,16 @@ def calculate_progress(solved_ids: set) -> dict:
     }
 
 
+@app.get("/set-lang/{lang}")
+def set_language_preference(request: Request, lang: str):
+    if lang not in ("th", "en"):
+        lang = "en"
+    referer = request.headers.get("referer", "/").split("?")[0]
+    response = RedirectResponse(url=referer, status_code=status.HTTP_303_SEE_OTHER)
+    response.set_cookie(key="lab_lang", value=lang, max_age=31536000, httponly=False, samesite="lax")
+    return response
+
+
 @app.get("/", response_class=HTMLResponse)
 def dashboard_view(
     request: Request,
