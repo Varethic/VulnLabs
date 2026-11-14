@@ -1,10 +1,10 @@
-# Intentionally Vulnerable Web Security Training Lab v2.0 (CTF Edition)
+# Educational Web Security Training Laboratory (VulnLabs)
 
-A modular, hands-on, intentionally vulnerable web security training lab designed for Capture The Flag (CTF) practice and secure coding training. Built using **FastAPI**, **SQLite**, **Jinja2 templates**, **Tailwind CSS (Monochrome)**, **Playwright**, and **Docker (Multi-Container Bridge)**.
+A modular, intentionally vulnerable web security training laboratory designed exclusively for authorized cybersecurity education and secure coding research. Built using **FastAPI**, **SQLite**, **Jinja2 templates**, **Tailwind CSS (Monochrome)**, **Playwright**, and **Docker**.
 
-> [!WARNING]
-> **STRICTLY FOR AUTHORIZED EDUCATIONAL & CTF TRAINING PURPOSES.**
-> This application contains intentionally insecure code vulnerable to critical attacks (RCE, SQLi, IDOR, XSS, LFI, SSRF, SSTI, Race Conditions, JWT forgery). Never deploy this application onto public networks or untrusted production environments. The Docker setup binds exclusively to the local loopback interface (`127.0.0.1:8080:8000`).
+> [!IMPORTANT]
+> **STRICTLY FOR EDUCATIONAL STUDY PURPOSES ONLY.**
+> This software is intended solely for academic learning, vulnerability research, and defense mechanisms study. It contains intentionally flawed logic (SQLi, XSS, IDOR, CMDi, LFI, JWT, SSRF, SSTI, Race Conditions) to demonstrate security impact and remediation patterns. Do not deploy to public untrusted networks or production environments.
 
 ---
 
@@ -17,7 +17,7 @@ A modular, hands-on, intentionally vulnerable web security training lab designed
 ├── requirements.txt                # FastAPI, Uvicorn, Jinja2, PyJWT, HTTPX, Playwright
 ├── flag.txt                        # Root filesystem flags (CMDi & LFI)
 ├── labs.db                         # SQLite database (auto-seeded on startup)
-├── test_v2.py                      # Automated end-to-end verification test suite
+├── test_lab.py                     # Automated verification test suite
 ├── internal_admin/                 # Isolated internal microservice (SSRF pivot target)
 │   ├── Dockerfile
 │   └── main.py                     # Listens on port 9000, returns internal secret flag
@@ -97,7 +97,7 @@ A modular, hands-on, intentionally vulnerable web security training lab designed
 
 Run automated checks across all 12 vulnerability paths and flag verification:
 ```bash
-python test_v2.py
+python test_lab.py
 ```
 
 ---

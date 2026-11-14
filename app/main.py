@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Web Application Security Training Environment",
     description="Hands-on web security laboratory covering vulnerability analysis and secure implementation patterns.",
-    version="2.0.0",
+    version="1.0.0",
     lifespan=lifespan,
 )
 

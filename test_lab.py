@@ -125,7 +125,7 @@ def run_all_tests():
 
     print(f"[+] All {len(all_flags)} flags successfully validated!")
     print("\n=======================================================")
-    print(">>> [SUCCESS] VULNLAB v2.0 FULLY VERIFIED AND OPERATIONAL! <<<")
+    print(">>> [SUCCESS] VULNLAB FULLY VERIFIED AND OPERATIONAL! <<<")
     print("=======================================================")
 
 if __name__ == "__main__":
